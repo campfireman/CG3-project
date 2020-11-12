@@ -1,9 +1,11 @@
+import { GUI } from "../../libJs/dat.gui.module.js";
 import { GLTFLoader } from "../../libJs/GLTFLoader.js";
 import {
   AmbientLight,
   PerspectiveCamera,
   Scene,
 } from "../../libJs/three.module.js";
+import { Window } from "./window.js";
 
 const MODEL_PATH = "../../models/";
 
@@ -64,7 +66,7 @@ class QuaternionWindow extends Window {
     );
 
     // GUI
-    this.gui = new dat.GUI();
+    this.gui = new GUI();
 
     var cam = this.gui.addFolder("Camera");
     cam.add(this.camera.position, "y", 0, 100).listen();
