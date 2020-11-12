@@ -14,6 +14,9 @@ class Window {
   update(time) {
     throw new TypeError("Must override method");
   }
+  hideGUI() {
+    this.gui.hide();
+  }
 }
 
 export { Window };

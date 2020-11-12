@@ -3,6 +3,7 @@ import { BezierWindow } from "./windows/bezierWindow.js";
 import { QuaternionWindow } from "./windows/quaternionWindow.js";
 
 var mainWindow = new BezierWindow();
+mainWindow.hideGUI();
 var mainWindow = new QuaternionWindow();
 
 const renderer = new WebGLRenderer({ antialias: true });
