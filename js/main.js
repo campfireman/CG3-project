@@ -1,7 +1,7 @@
 import { GUI } from "../../libJs/dat.gui.module.js";
 import { WebGLRenderer } from "../libJs/three.module.js";
-import { BezierWindow } from "./windows/bezierWindow.js";
-import { QuaternionWindow } from "./windows/quaternionWindow.js";
+import { BezierWindow } from "./windows/bezierWindow/bezierWindow.js";
+import { QuaternionWindow } from "./windows/quaternionWindow/quaternionWindow.js";
 
 var windowInstances = [
 	new BezierWindow(),

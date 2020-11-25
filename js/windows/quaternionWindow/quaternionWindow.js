@@ -1,13 +1,13 @@
-import { GUI } from "../../libJs/dat.gui.module.js";
-import { GLTFLoader } from "../../libJs/GLTFLoader.js";
+import { GUI } from "../../../libJs/dat.gui.module.js";
+import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
 import {
   AmbientLight,
   PerspectiveCamera,
   Scene,
-} from "../../libJs/three.module.js";
-import { Window } from "./window.js";
+} from "../../../libJs/three.module.js";
+import { Window } from "../window.js";
 
-const MODEL_PATH = "../../models/";
+const MODEL_PATH = "../../../models/";
 
 class QuaternionWindow extends Window {
   constructor() {

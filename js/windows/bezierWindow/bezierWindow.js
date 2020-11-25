@@ -1,12 +1,12 @@
-import { GUI } from "../../libJs/dat.gui.module.js";
+import { GUI } from "../../../libJs/dat.gui.module.js";
 import {
 	BoxGeometry,
 	Mesh,
 	MeshBasicMaterial,
 	PerspectiveCamera,
 	Scene,
-} from "../../libJs/three.module.js";
-import { Window } from "./window.js";
+} from "../../../libJs/three.module.js";
+import { Window } from "../window.js";
 
 class BezierWindow extends Window {
 	constructor() {
