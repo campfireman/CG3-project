@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "dat.gui": "^0.7.7",
+    "express": "^4.17.1",
+    "three": "^0.123.0"
+  },
+  "name": "cg3",
+  "description": "",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "author": "",
+  "license": "ISC"
+}

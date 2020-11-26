@@ -10,8 +10,8 @@ import { Window } from "../window.js";
 const MODEL_PATH = "../../../models/";
 
 class QuaternionWindow extends Window {
-  constructor() {
-    super();
+  constructor(renderer) {
+    super(renderer);
     this.options = {
       velx: 0,
       vely: 0,

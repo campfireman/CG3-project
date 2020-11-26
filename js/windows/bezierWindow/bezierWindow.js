@@ -1,16 +1,21 @@
-import { GUI } from "../../../libJs/dat.gui.module.js";
+import * as THREE from "/three/three.module.js";
+import * as DAT from "/dat/dat.gui.module.js";
+
+/*import { GUI } from "../../../libJs/dat.gui.module.js";
 import {
 	BoxGeometry,
 	Mesh,
 	MeshBasicMaterial,
 	PerspectiveCamera,
 	Scene,
-} from "../../../libJs/three.module.js";
+} from "../../../libJs/three.module.js";*/
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
+import { TransformControls } from '/jsm/controls/TransformControls.js';
 import { Window } from "../window.js";
 
 class BezierWindow extends Window {
-	constructor() {
-		super();
+	constructor(renderer) {
+		super(renderer);
 		this.options = {
 			velx: 0,
 			vely: 0,
@@ -34,22 +39,33 @@ class BezierWindow extends Window {
 			},
 		};
 
-		this.scene = new Scene();
-		this.camera = new PerspectiveCamera(
+		this.scene = new THREE.Scene();
+		this.camera = new THREE.PerspectiveCamera(
 			75,
 			window.innerWidth / window.innerHeight,
 			0.1,
 			1000
 		);
 
-		this.geometry = new BoxGeometry();
-		this.material = new MeshBasicMaterial({ color: 0x00ff00 });
-		this.cube = new Mesh(this.geometry, this.material);
+		this.orbitControls = new OrbitControls(this.camera, renderer.domElement);
+		this.orbitControls.update();
+
+		this.geometry = new THREE.BoxGeometry();
+		this.material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+		this.cube = new THREE.Mesh(this.geometry, this.material);
 		this.scene.add(this.cube);
+
+		this.control = new TransformControls(this.camera, renderer.domElement);
+		this.control.addEventListener("dragging-changed", (event) => {
+			this.orbitControls.enabled = !event.value;
+		});
+
+		this.control.attach(this.cube);
+		this.scene.add(this.control);
 
 		this.camera.position.z = 5;
 
-		this.gui = new GUI();
+		this.gui = new DAT.GUI();
 
 		var cam = this.gui.addFolder("Camera");
 		cam.add(this.options.camera, "speed", 0, 0.001).listen();

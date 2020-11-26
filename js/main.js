@@ -1,11 +1,18 @@
-import { GUI } from "../../libJs/dat.gui.module.js";
-import { WebGLRenderer } from "../libJs/three.module.js";
+import * as THREE from "/three/three.module.js";
+import * as DAT from "/dat/dat.gui.module.js";
+
+//import { GUI } from "../../libJs/dat.gui.module.js";
+//import { TetrahedronGeometry, WebGLRenderer } from "../libJs/three.module.js";
 import { BezierWindow } from "./windows/bezierWindow/bezierWindow.js";
 import { QuaternionWindow } from "./windows/quaternionWindow/quaternionWindow.js";
 
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
 var windowInstances = [
-	new BezierWindow(),
-	new QuaternionWindow()
+	new BezierWindow(renderer),
+	new QuaternionWindow(renderer)
 ]
 
 var windowIndecies = {
@@ -24,7 +31,7 @@ for(let i = 0; i < windowInstances.length; i++) {
 var currentWindow = windowInstances[globalOptions.window];
 currentWindow.getGUI().show();
 
-var windowsSelectGui = new GUI();
+var windowsSelectGui = new DAT.GUI();
 
 var windowFolder = windowsSelectGui.addFolder("Current window");
 windowFolder.add(globalOptions, "window", windowIndecies).onChange((newWindowIndex) => {
@@ -35,10 +42,6 @@ windowFolder.add(globalOptions, "window", windowIndecies).onChange((newWindowInd
 	currentWindow.getGUI().show();
 });
 windowFolder.open();
-
-const renderer = new WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
 
 function animate(time) {
 	currentWindow.update(time);
