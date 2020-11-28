@@ -5,35 +5,97 @@ import {
   GridHelper,
   PerspectiveCamera,
   Scene,
+  Vector3,
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
+import { QuaternionCustom as Quaternion } from "./Quaternion.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
 const MODEL_PATH = "../../../models/";
 
+const MIN_AXIS_VALUE = -10.0;
+const MIN_THETA_VALUE = 0.0;
+
+const MAX_AXIS_VALUE = 10.0;
+const MAX_THETA_VALUE = 2.0;
+
+const DEFAULT_X_VALUE = 1.0;
+const DEFAULT_Y_VALUE = 1.0;
+const DEFAULT_Z_VALUE = 1.0;
+const DEFAULT_THETA_VALUE = 0.5;
+
 class QuaternionWindow extends Window {
   constructor(renderer) {
     super(renderer);
+    this.count = 0;
     this.options = {
       velx: 0,
       vely: 0,
+      count: 0,
       camera: {
         speed: 0.0001,
       },
-      stop: function () {
-        this.velx = 0;
-        this.vely = 0;
+      addQuaternion: () => {
+        if (this.count > 0) {
+          this.quaternions[this.count - 1].folder.close();
+        }
+        let newQuaternionFolder = this.quaternionFolder.addFolder(
+          `Quaternion ${this.count}`
+        );
+        let attributes = {
+          folder: newQuaternionFolder,
+          quaternion: new Quaternion(
+            new Vector3(DEFAULT_X_VALUE, DEFAULT_Y_VALUE, DEFAULT_Z_VALUE),
+            DEFAULT_THETA_VALUE
+          ),
+        };
+        this.quaternions[this.count] = attributes;
+        newQuaternionFolder
+          .add(
+            this.quaternions[this.count].quaternion,
+            "x",
+            MIN_AXIS_VALUE,
+            MAX_AXIS_VALUE
+          )
+          .name("X")
+          .listen();
+        newQuaternionFolder
+          .add(
+            this.quaternions[this.count].quaternion,
+            "y",
+            MIN_AXIS_VALUE,
+            MAX_AXIS_VALUE
+          )
+          .name("Y")
+          .listen();
+        newQuaternionFolder
+          .add(
+            this.quaternions[this.count].quaternion,
+            "z",
+            MIN_AXIS_VALUE,
+            MAX_AXIS_VALUE
+          )
+          .name("Z")
+          .listen();
+        newQuaternionFolder
+          .add(
+            this.quaternions[this.count].quaternion,
+            "theta",
+            MIN_THETA_VALUE,
+            MAX_THETA_VALUE
+          )
+          .name("Theta")
+          .listen();
+        newQuaternionFolder.open();
+        this.count++;
       },
-      reset: function () {
-        this.velx = 0.1;
-        this.vely = 0.1;
-        camera.position.z = 75;
-        camera.position.x = 0;
-        camera.position.y = 0;
-        cube.scale.x = 1;
-        cube.scale.y = 1;
-        cube.scale.z = 1;
-        cube.material.wireframe = true;
+      removeQuaternion: () => {
+        if (this.count == 0) {
+          return;
+        }
+        this.count--;
+        this.quaternionFolder.removeFolder(this.quaternions[this.count].folder);
+        delete this.quaternions[this.count];
       },
     };
 
@@ -76,20 +138,20 @@ class QuaternionWindow extends Window {
     // GUI
     this.gui = new GUI();
 
-    var cam = this.gui.addFolder("Camera");
-    cam.add(this.camera.position, "y", 0, 100).listen();
-    cam.open();
+    this.quaternionFolder = this.gui.addFolder("Quaternions");
+    this.quaternions = {};
 
-    var velocity = this.gui.addFolder("Velocity");
-    velocity.add(this.options, "velx", -0.2, 0.2).name("X").listen();
-    velocity.add(this.options, "vely", -0.2, 0.2).name("Y").listen();
-    velocity.open();
+    this.quaternionFolder
+      .add(this.options, "addQuaternion")
+      .name("Add quaternion");
+    this.quaternionFolder
+      .add(this.options, "removeQuaternion")
+      .name("Remove quaternion");
+    this.quaternionFolder.open();
   }
 
   update(time) {
     if (this.object != null) {
-      this.object.rotation.x += this.options.velx;
-      this.object.rotation.y += this.options.vely;
     }
   }
 
