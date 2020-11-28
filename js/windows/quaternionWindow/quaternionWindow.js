@@ -2,10 +2,12 @@ import { GUI } from "../../../libJs/dat.gui.module.js";
 import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
 import {
   AmbientLight,
+  GridHelper,
   PerspectiveCamera,
   Scene,
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
 const MODEL_PATH = "../../../models/";
 
@@ -40,6 +42,7 @@ class QuaternionWindow extends Window {
     const color = 0xffffff;
     const intensity = 1;
     this.scene.add(new AmbientLight(color, intensity));
+    this.scene.add(new GridHelper(50, 20));
 
     // camera
     this.camera = new PerspectiveCamera(
@@ -49,6 +52,11 @@ class QuaternionWindow extends Window {
       1000
     );
     this.camera.position.z = 5;
+    this.orbitControls = new OrbitControls(
+      this.camera,
+      this.renderer.domElement
+    );
+    this.orbitControls.update();
 
     // objects
     this.object = null;
