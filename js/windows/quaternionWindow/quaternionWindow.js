@@ -6,6 +6,7 @@ import {
   Scene,
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
 const MODEL_PATH = "../../../models/";
 
@@ -49,6 +50,11 @@ class QuaternionWindow extends Window {
       1000
     );
     this.camera.position.z = 5;
+    this.orbitControls = new OrbitControls(
+      this.camera,
+      this.renderer.domElement
+    );
+    this.orbitControls.update();
 
     // objects
     this.object = null;
