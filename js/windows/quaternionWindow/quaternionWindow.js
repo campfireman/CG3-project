@@ -2,6 +2,7 @@ import { GUI } from "../../../libJs/dat.gui.module.js";
 import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
 import {
   AmbientLight,
+  GridHelper,
   PerspectiveCamera,
   Scene,
 } from "../../../libJs/three.module.js";
@@ -41,6 +42,7 @@ class QuaternionWindow extends Window {
     const color = 0xffffff;
     const intensity = 1;
     this.scene.add(new AmbientLight(color, intensity));
+    this.scene.add(new GridHelper(50, 20));
 
     // camera
     this.camera = new PerspectiveCamera(
