@@ -6,3 +6,9 @@ body {
 canvas {
     display: block;
 }
+
+#window-control{ 
+    position: absolute;
+    top: 0;
+    left: 15px;
+}
