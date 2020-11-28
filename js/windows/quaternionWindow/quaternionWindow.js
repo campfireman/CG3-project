@@ -96,6 +96,9 @@ class QuaternionWindow extends Window {
         this.count--;
         this.quaternionFolder.removeFolder(this.quaternions[this.count].folder);
         delete this.quaternions[this.count];
+        if (this.count > 0) {
+          this.quaternions[this.count - 1].folder.open();
+        }
       },
     };
 
