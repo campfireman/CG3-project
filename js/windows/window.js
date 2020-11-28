@@ -1,26 +1,23 @@
 class Window {
-	constructor(renderer) {
-		this.renderer = renderer
-	}
+  constructor(renderer) {
+    this.renderer = renderer;
+  }
 
-	getScene() {
-		throw new TypeError("Must override method");
-	}
+  getScene() {
+    throw new TypeError("Must override method");
+  }
 
-	getCamera() {
-		throw new TypeError("Must override method");
-	}
+  getCamera() {
+    throw new TypeError("Must override method");
+  }
 
-	getGUI() {
-		throw new TypeError("Must override method");
-	}
+  getGUI() {
+    throw new TypeError("Must override method");
+  }
 
-	update(time) {
-		throw new TypeError("Must override method");
-	}
-	hideGUI() {
-		this.gui.hide();
-	}
+  update(time) {
+    throw new TypeError("Must override method");
+  }
 }
 
 export { Window };
