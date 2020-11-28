@@ -13,18 +13,11 @@ const PLOT_SIZE = 10;
 const PLOT_ORIGIN = new THREE.Vector3(-PLOT_SIZE / 2, 0, -4);
 const STEPS = 50;
 
-/*const BERSTEIN_COLORS = [
+const BERSTEIN_COLORS = [
 	new THREE.Color(0x0033cc),
 	new THREE.Color(0x33cc33),
 	new THREE.Color(0xff3300),
 	new THREE.Color(0xcc00ff)
-];*/
-
-const BERSTEIN_COLORS = [
-	new THREE.Color(0xff0000),
-	new THREE.Color(0x00ff00),
-	new THREE.Color(0x0000ff),
-	new THREE.Color(0xffffff)
 ];
 
 const NUM_CONTROL_POINTS = 4;
