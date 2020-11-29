@@ -2,9 +2,15 @@ import { GUI } from "../../../libJs/dat.gui.module.js";
 import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
 import {
   AmbientLight,
+  ArrowHelper,
+  BufferGeometry,
+  EllipseCurve,
   GridHelper,
+  Line,
+  LineBasicMaterial,
   PerspectiveCamera,
   Scene,
+  Vector3,
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
 import { QuaternionAngle } from "./Quaternion.js";
@@ -23,7 +29,8 @@ const MAX_ANIMATION_TIME = 5000;
 const DEFAULT_THETA_VALUE = 0.5 * Math.PI;
 const DEFAULT_ANIMATION_TIME = 2000;
 
-const QUATERNION_RAND_INTERVAL = 4;
+const QUATERNION_RAND_INTERVAL = 2;
+const ROTATION_AXIS_COLOR = 0x66d9ef;
 
 class QuaternionWindow extends Window {
   constructor(renderer) {
@@ -133,6 +140,9 @@ class QuaternionWindow extends Window {
 
     // animation
     this.resetAnimation();
+    this.arrowHelper = null;
+    this.rotationArrow = null;
+    this.visualizeQuaternions();
   }
 
   /**
@@ -156,6 +166,32 @@ class QuaternionWindow extends Window {
       val.quaternion.updateValues();
     });
   }
+  visualizeQuaternions() {
+    let origin = new Vector3(0, 0, 0);
+    let direction = new Vector3().copy(this.curQ.a);
+    let length = 1;
+    if (this.arrowHelper != null) {
+      this.scene.remove(this.arrowHelper);
+      delete this.arrowHelper;
+      this.scene.remove(this.rotationArrow);
+      delete this.rotationArrow;
+    }
+    this.arrowHelper = new ArrowHelper(
+      direction.normalize(),
+      origin,
+      length,
+      ROTATION_AXIS_COLOR
+    );
+    this.curve = new EllipseCurve(0, 0, 1, 1, 0, this.curQ.theta, false);
+    const points = this.curve.getPoints(50);
+    const geometry = new BufferGeometry().setFromPoints(points);
+
+    const material = new LineBasicMaterial({ color: 0xff0000 });
+
+    this.rotationArrow = new Line(geometry, material);
+    this.scene.add(this.arrowHelper);
+    this.scene.add(this.rotationArrow);
+  }
   /**
    * Animates the given object with the given quaternions, distributes time evenly quaternions
    * @param {int} time milliseconds since start
@@ -176,6 +212,7 @@ class QuaternionWindow extends Window {
       // restart animation
       if (this.sum > this.options.animationTime) {
         this.resetAnimation();
+        this.visualizeQuaternions();
         return;
       }
       // check if share of quaternions time has been exceeded and go to next quaternion
@@ -187,6 +224,7 @@ class QuaternionWindow extends Window {
         this.curQ = this.quaternions[this.cur].quaternion;
         this.cur++;
         this.sumQ = 0;
+        this.visualizeQuaternions();
       }
       // interpolate between quaternions based on t
       let t =
