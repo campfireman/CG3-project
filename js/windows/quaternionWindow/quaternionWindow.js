@@ -42,6 +42,7 @@ class QuaternionWindow extends Window {
           this.quaternions[this.count - 1].folder.close();
         }
         this.addQuaternion();
+        this.resetAnimation();
       },
       removeQuaternion: () => {
         if (this.count == 1) {
@@ -53,6 +54,7 @@ class QuaternionWindow extends Window {
         if (this.count > 0) {
           this.quaternions[this.count - 1].folder.open();
         }
+        this.resetAnimation();
       },
       startAnimation: () => {
         this.options.animate = !this.options.animate;
