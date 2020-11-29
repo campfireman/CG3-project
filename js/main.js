@@ -20,7 +20,7 @@ var windowIndecies = {
 };
 
 var globalOptions = {
-  window: 1,
+  window: 0,
 };
 
 for (let i = 0; i < windowInstances.length; i++) {
