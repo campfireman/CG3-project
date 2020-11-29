@@ -94,10 +94,6 @@ class QuaternionBase {
     let v1 = other.normalize();
 
     let dot = v0.dot(v1);
-    if (dot < 0.0) {
-      v1 = v1.negate();
-      dot = -dot;
-    }
     if (dot > 0.9995) {
       let result = v0.add(v1.add(v0.negate()).multiplyScalar(t));
       return result.normalize();
