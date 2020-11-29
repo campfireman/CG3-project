@@ -28,8 +28,6 @@ const QUATERNION_RAND_INTERVAL = 4;
 class QuaternionWindow extends Window {
   constructor(renderer) {
     super(renderer);
-    // counts the amount of quaternions present
-    this.count = 0;
     // holds the quaternion's gui folder and it's representation
     this.quaternions = [];
     // all attributes and functions related to the GUI
@@ -40,21 +38,25 @@ class QuaternionWindow extends Window {
         speed: 0.0001,
       },
       addQuaternion: () => {
-        if (this.count > 0) {
-          this.quaternions[this.count - 1].folder.close();
+        if (this.count() > 0) {
+          this.quaternions[this.count() - 1].folder.close();
         }
         this.addQuaternion();
         this.resetAnimation();
       },
       removeQuaternion: () => {
-        if (this.count == 1) {
+        if (this.count() == 1) {
           return;
         }
-        this.count--;
-        this.quaternionFolder.removeFolder(this.quaternions[this.count].folder);
-        delete this.quaternions[this.count];
-        if (this.count > 0) {
-          this.quaternions[this.count - 1].folder.open();
+        console.log(this.count() - 1);
+        console.log(this.quaternions);
+        this.quaternionFolder.removeFolder(
+          this.quaternions[this.count() - 1].folder
+        );
+        delete this.quaternions[this.count() - 1];
+        this.quaternions.pop();
+        if (this.count() > 0) {
+          this.quaternions[this.count() - 1].folder.open();
         }
         this.resetAnimation();
       },
@@ -192,14 +194,16 @@ class QuaternionWindow extends Window {
       QUATERNION_RAND_INTERVAL / 2
     );
   }
+  count() {
+    return this.quaternions.length;
+  }
   /**
    * Add quaternion to GUI and its representation to internal datastructure
    */
   addQuaternion() {
     let newQuaternionFolder = this.quaternionFolder.addFolder(
-      `Quaternion ${this.count}`
+      `Quaternion ${this.count()}`
     );
-    console.log();
     let x = this.random();
     let y = this.random();
     let z = this.random();
@@ -207,10 +211,10 @@ class QuaternionWindow extends Window {
       folder: newQuaternionFolder,
       quaternion: new QuaternionAngle(DEFAULT_THETA_VALUE, x, y, z),
     };
-    this.quaternions[this.count] = attributes;
+    this.quaternions.push(attributes);
     newQuaternionFolder
       .add(
-        this.quaternions[this.count].quaternion.a,
+        this.quaternions[this.count() - 1].quaternion.a,
         "x",
         MIN_AXIS_VALUE,
         MAX_AXIS_VALUE
@@ -219,7 +223,7 @@ class QuaternionWindow extends Window {
       .listen();
     newQuaternionFolder
       .add(
-        this.quaternions[this.count].quaternion.a,
+        this.quaternions[this.count() - 1].quaternion.a,
         "y",
         MIN_AXIS_VALUE,
         MAX_AXIS_VALUE
@@ -228,7 +232,7 @@ class QuaternionWindow extends Window {
       .listen();
     newQuaternionFolder
       .add(
-        this.quaternions[this.count].quaternion.a,
+        this.quaternions[this.count() - 1].quaternion.a,
         "z",
         MIN_AXIS_VALUE,
         MAX_AXIS_VALUE
@@ -237,7 +241,7 @@ class QuaternionWindow extends Window {
       .listen();
     newQuaternionFolder
       .add(
-        this.quaternions[this.count].quaternion,
+        this.quaternions[this.count() - 1].quaternion,
         "theta",
         MIN_THETA_VALUE,
         MAX_THETA_VALUE
@@ -245,7 +249,6 @@ class QuaternionWindow extends Window {
       .name("Theta")
       .listen();
     newQuaternionFolder.open();
-    this.count++;
   }
   getScene() {
     return this.scene;
