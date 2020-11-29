@@ -1,4 +1,4 @@
-import { Matrix4, Quaternion, Vector3 } from "../../../libJs/three.module.js";
+import { Matrix4, Vector3 } from "../../../libJs/three.module.js";
 class QuaternionBase {
   constructor(s, x, y, z) {
     this.s = s;
@@ -67,12 +67,12 @@ class QuaternionBase {
     return Math.sqrt(Math.pow(this.s, 2) + res.dot(res.clone()));
   }
   invert() {
-    return new Quaternion(this.s, -this.x, -this.y, -this.z).multiplyScalar(
+    return new QuaternionBase(this.s, -this.x, -this.y, -this.z).multiplyScalar(
       1 / Math.pow(this.norm(), 2)
     );
   }
   negate() {
-    return new Quaternion(-this.s, -this.x, -this.y, -this.z);
+    return new QuaternionBase(-this.s, -this.x, -this.y, -this.z);
   }
 
   slerp(other, t) {
