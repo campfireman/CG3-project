@@ -20,11 +20,10 @@ const MAX_AXIS_VALUE = 10.0;
 const MAX_THETA_VALUE = 2.0 * Math.PI;
 const MAX_ANIMATION_TIME = 5000;
 
-const DEFAULT_X_VALUE = 1.0;
-const DEFAULT_Y_VALUE = 0.0;
-const DEFAULT_Z_VALUE = 0.0;
 const DEFAULT_THETA_VALUE = 0.5 * Math.PI;
 const DEFAULT_ANIMATION_TIME = 2000;
+
+const QUATERNION_RAND_INTERVAL = 4;
 
 class QuaternionWindow extends Window {
   constructor(renderer) {
@@ -187,6 +186,12 @@ class QuaternionWindow extends Window {
       this.object.setRotationFromMatrix(pos.matrix);
     }
   }
+  random() {
+    return (
+      Math.floor(Math.random() * QUATERNION_RAND_INTERVAL) -
+      QUATERNION_RAND_INTERVAL / 2
+    );
+  }
   /**
    * Add quaternion to GUI and its representation to internal datastructure
    */
@@ -194,15 +199,13 @@ class QuaternionWindow extends Window {
     let newQuaternionFolder = this.quaternionFolder.addFolder(
       `Quaternion ${this.count}`
     );
+    console.log();
+    let x = this.random();
+    let y = this.random();
+    let z = this.random();
     let attributes = {
       folder: newQuaternionFolder,
-      quaternion: new QuaternionAngle(
-        DEFAULT_THETA_VALUE + this.count * DEFAULT_THETA_VALUE,
-        DEFAULT_X_VALUE +
-          this.count * DEFAULT_X_VALUE * ((this.count % 2) * -1),
-        DEFAULT_Y_VALUE,
-        DEFAULT_Z_VALUE
-      ),
+      quaternion: new QuaternionAngle(DEFAULT_THETA_VALUE, x, y, z),
     };
     this.quaternions[this.count] = attributes;
     newQuaternionFolder
