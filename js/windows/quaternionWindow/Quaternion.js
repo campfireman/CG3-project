@@ -1,4 +1,8 @@
 import { Matrix4, Vector3 } from "../../../libJs/three.module.js";
+/**
+ * The fundamental way to represent a quaternion based on a real s and the complex components i, j and k
+ * Has to be named QuaternionBase because of namespace conflicts with three.js
+ */
 class QuaternionBase {
   constructor(s, x, y, z) {
     this.s = s;
@@ -6,6 +10,12 @@ class QuaternionBase {
     this.y = y;
     this.z = z;
     this.matrix = new Matrix4();
+    this.updateMatrix();
+  }
+  /**
+   * Sets matrix attribute to a rotation matrix that ist equivalent to the quaternion
+   */
+  updateMatrix() {
     this.matrix.set(
       1 - 2 * (Math.pow(this.y, 2) + Math.pow(this.z, 2)),
       2 * (this.x * this.y - this.s * this.z),
@@ -28,7 +38,6 @@ class QuaternionBase {
   normalize() {
     return this.multiplyScalar(1 / this.norm());
   }
-  // operators
   add(other) {
     return new QuaternionBase(
       this.s + other.s,
@@ -74,7 +83,12 @@ class QuaternionBase {
   negate() {
     return new QuaternionBase(-this.s, -this.x, -this.y, -this.z);
   }
-
+  /**
+   *
+   * @param {QuaternionBase} other the other quaternion to interpolate to
+   * @param {double} t timepoint of the interpolation, has to be element of the interval [0, 1]
+   * @returns {QuaternionBase} the interpolated quaternion based on the time
+   */
   slerp(other, t) {
     let v0 = this.normalize();
     let v1 = other.normalize();
@@ -98,6 +112,10 @@ class QuaternionBase {
   }
 }
 
+/**
+ * Initialization of quaternion based on desired rotation angle theta and rotation axis a with x, y, z
+ *
+ */
 class QuaternionAngle extends QuaternionBase {
   constructor(theta, x, y, z) {
     let s = Math.cos(theta / 2);
@@ -109,12 +127,16 @@ class QuaternionAngle extends QuaternionBase {
     this.theta = theta;
     this.a = new Vector3(x, y, z);
   }
+  /**
+   * If the values of theta or a change, the internal representation has to be updated manually :(
+   */
   updateValues() {
     this.s = Math.cos(this.theta / 2);
     let angle = Math.sin(this.theta / 2);
     this.x = this.a.x * angle;
     this.y = this.a.y * angle;
     this.z = this.a.z * angle;
+    this.updateMatrix();
   }
 }
 
