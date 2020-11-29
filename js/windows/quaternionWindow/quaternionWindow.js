@@ -132,6 +132,7 @@ class QuaternionWindow extends Window {
     this.prevT = 0;
     this.first = true;
     this.cur = 1;
+    this.sumQ = 0;
   }
   updateQuaternions() {
     this.quaternions.forEach((val) => {
@@ -146,9 +147,9 @@ class QuaternionWindow extends Window {
         this.updateQuaternions();
       }
       let delta = time - this.prevT;
-      let t = this.sum / (this.options.animationTime / this.quaternions.length);
       this.prevT = time;
       this.sum += delta;
+      this.sumQ += delta;
       if (this.sum > this.options.animationTime) {
         this.resetAnimation();
         return;
@@ -160,7 +161,10 @@ class QuaternionWindow extends Window {
         this.prevQ = this.curQ;
         this.curQ = this.quaternions[this.cur].quaternion;
         this.cur++;
+        this.sumQ = 0;
       }
+      let t =
+        this.sumQ / (this.options.animationTime / this.quaternions.length);
       let pos = this.prevQ.slerp(this.curQ, t);
       this.object.setRotationFromMatrix(pos.matrix);
     }

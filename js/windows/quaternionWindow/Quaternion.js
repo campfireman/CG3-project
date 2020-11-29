@@ -51,7 +51,7 @@ class QuaternionBase {
       .clone()
       .multiplyScalar(s1)
       .add(v1.clone().multiplyScalar(s2))
-      .add(v1.clone().cross(v2));
+      .add(v1.clone().cross(v2.clone()));
     return new QuaternionBase(s1 * s2 - v1.dot(v2), res.x, res.y, res.z);
   }
   multiplyScalar(scalar) {
@@ -68,7 +68,7 @@ class QuaternionBase {
   }
   invert() {
     return new Quaternion(this.s, -this.x, -this.y, -this.z).multiplyScalar(
-      1 / Math.pow(this.norm, 2)
+      1 / Math.pow(this.norm(), 2)
     );
   }
   negate() {
