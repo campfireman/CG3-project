@@ -60,8 +60,9 @@ class QuaternionWindow extends Window {
         }
         this.resetAnimation();
       },
-      startAnimation: () => {
+      toggleAnimation: () => {
         this.options.animate = !this.options.animate;
+        this.resetAnimation();
       },
     };
 
@@ -116,7 +117,9 @@ class QuaternionWindow extends Window {
 
     this.addQuaternion();
     this.animationFolder = this.gui.addFolder("Animation");
-    this.animationFolder.add(this.options, "startAnimation");
+    this.animationFolder
+      .add(this.options, "toggleAnimation")
+      .name("Start/Stop");
     this.animationFolder
       .add(
         this.options,
@@ -153,6 +156,10 @@ class QuaternionWindow extends Window {
       val.quaternion.updateValues();
     });
   }
+  /**
+   * Animates the given object with the given quaternions, distributes time evenly quaternions
+   * @param {int} time milliseconds since start
+   */
   update(time) {
     if (this.object != null && this.options.animate) {
       // fencepost: if animation just started set values
