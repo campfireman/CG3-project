@@ -1,5 +1,5 @@
 import { Matrix4, Quaternion, Vector3 } from "../../../libJs/three.module.js";
-class QuaternionCustom {
+class QuaternionBase {
   constructor(s, x, y, z) {
     this.s = s;
     this.x = x;
@@ -30,7 +30,7 @@ class QuaternionCustom {
   }
   // operators
   add(other) {
-    return new QuaternionCustom(
+    return new QuaternionBase(
       this.s + other.s,
       this.x + other.x,
       this.y + other.y,
@@ -52,10 +52,10 @@ class QuaternionCustom {
       .multiplyScalar(s1)
       .add(v1.clone().multiplyScalar(s2))
       .add(v1.clone().cross(v2));
-    return new QuaternionCustom(s1 * s2 - v1.dot(v2), res.x, res.y, res.z);
+    return new QuaternionBase(s1 * s2 - v1.dot(v2), res.x, res.y, res.z);
   }
   multiplyScalar(scalar) {
-    return new QuaternionCustom(
+    return new QuaternionBase(
       this.s * scalar,
       this.x * scalar,
       this.y * scalar,
@@ -98,7 +98,7 @@ class QuaternionCustom {
   }
 }
 
-class QuaternionAngle extends QuaternionCustom {
+class QuaternionAngle extends QuaternionBase {
   constructor(theta, x, y, z) {
     let s = Math.cos(theta / 2);
     let angle = Math.sin(theta / 2);
@@ -118,4 +118,4 @@ class QuaternionAngle extends QuaternionCustom {
   }
 }
 
-export { QuaternionCustom, QuaternionAngle };
+export { QuaternionBase, QuaternionAngle };
