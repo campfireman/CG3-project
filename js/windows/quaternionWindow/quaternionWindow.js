@@ -29,8 +29,11 @@ const DEFAULT_ANIMATION_TIME = 2000;
 class QuaternionWindow extends Window {
   constructor(renderer) {
     super(renderer);
+    // counts the amount of quaternions present
     this.count = 0;
+    // holds the quaternion's gui folder and it's representation
     this.quaternions = [];
+    // all attributes and functions related to the GUI
     this.options = {
       animate: false,
       animationTime: DEFAULT_ANIMATION_TIME,
@@ -127,6 +130,10 @@ class QuaternionWindow extends Window {
     // animation
     this.resetAnimation();
   }
+
+  /**
+   * All variables that need to be reset when animation loops starts
+   */
   resetAnimation() {
     this.sum = 0;
     this.prevQ = new QuaternionAngle(0, 1, 0, 0);
@@ -136,6 +143,10 @@ class QuaternionWindow extends Window {
     this.cur = 1;
     this.sumQ = 0;
   }
+  /**
+   * Angle based quaternions need to be updated if values changed
+   * For compatibility with dat.GUI all quaternions are updated regardless if they changed or not
+   */
   updateQuaternions() {
     this.quaternions.forEach((val) => {
       val.quaternion.updateValues();
@@ -143,19 +154,23 @@ class QuaternionWindow extends Window {
   }
   update(time) {
     if (this.object != null && this.options.animate) {
+      // fencepost: if animation just started set values
       if (this.first) {
         this.prevT = time;
         this.first = false;
         this.updateQuaternions();
       }
+      // calculate progress of animation
       let delta = time - this.prevT;
       this.prevT = time;
       this.sum += delta;
       this.sumQ += delta;
+      // restart animation
       if (this.sum > this.options.animationTime) {
         this.resetAnimation();
         return;
       }
+      // check if share of quaternions time has been exceeded and go to next quaternion
       if (
         this.sum >
         this.cur * (this.options.animationTime / this.quaternions.length)
@@ -165,12 +180,16 @@ class QuaternionWindow extends Window {
         this.cur++;
         this.sumQ = 0;
       }
+      // interpolate between quaternions based on t
       let t =
         this.sumQ / (this.options.animationTime / this.quaternions.length);
       let pos = this.prevQ.slerp(this.curQ, t);
       this.object.setRotationFromMatrix(pos.matrix);
     }
   }
+  /**
+   * Add quaternion to GUI and its representation to internal datastructure
+   */
   addQuaternion() {
     let newQuaternionFolder = this.quaternionFolder.addFolder(
       `Quaternion ${this.count}`
