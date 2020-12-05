@@ -35,6 +35,15 @@ class QuaternionBase {
       1
     );
   }
+  getRotationAxis() {
+    let theta_2 = Math.acos(this.s);
+    let a_inv = Math.sin(theta_2);
+    this.theta = theta_2 * 2;
+    return new Vector3(this.x / a_inv, this.y / a_inv, this.z / a_inv);
+  }
+  getTheta() {
+    Math.acos(this.s) * 2;
+  }
   normalize() {
     return this.multiplyScalar(1 / this.norm());
   }
@@ -114,14 +123,15 @@ class QuaternionBase {
  */
 class QuaternionAngle extends QuaternionBase {
   constructor(theta, x, y, z) {
+    let a = new Vector3(x, y, z).normalize();
     let s = Math.cos(theta / 2);
     let angle = Math.sin(theta / 2);
-    let v_x = x * angle;
-    let v_y = y * angle;
-    let v_z = z * angle;
+    let v_x = a.x * angle;
+    let v_y = a.y * angle;
+    let v_z = a.z * angle;
     super(s, v_x, v_y, v_z);
     this.theta = theta;
-    this.a = new Vector3(x, y, z);
+    this.a = a;
   }
   /**
    * If the values of theta or a change, the internal representation has to be updated manually :(
@@ -133,6 +143,13 @@ class QuaternionAngle extends QuaternionBase {
     this.y = this.a.y * angle;
     this.z = this.a.z * angle;
     this.updateMatrix();
+    this.a.normalize();
+  }
+  getRotationAxis() {
+    return this.a;
+  }
+  getTheta() {
+    return this.theta;
   }
 }
 

@@ -4,7 +4,6 @@ import {
   AmbientLight,
   ArrowHelper,
   BufferGeometry,
-  EllipseCurve,
   GridHelper,
   Line,
   LineBasicMaterial,
@@ -23,8 +22,10 @@ const MIN_THETA_VALUE = 0.0;
 const MIN_ANIMATION_TIME = 100;
 
 const MAX_AXIS_VALUE = 10.0;
-const MAX_THETA_VALUE = 2.0 * Math.PI;
+const MAX_THETA_VALUE = 2.0 * Math.PI - 0.00001;
 const MAX_ANIMATION_TIME = 5000;
+
+const AXIS_STEP_SIZE = 1;
 
 const DEFAULT_THETA_VALUE = 0.5 * Math.PI;
 const DEFAULT_ANIMATION_TIME = 2000;
@@ -55,8 +56,6 @@ class QuaternionWindow extends Window {
         if (this.count() == 1) {
           return;
         }
-        console.log(this.count() - 1);
-        console.log(this.quaternions);
         this.quaternionFolder.removeFolder(
           this.quaternions[this.count() - 1].folder
         );
@@ -102,6 +101,7 @@ class QuaternionWindow extends Window {
       (gltf) => {
         this.object = gltf.scene;
         this.scene.add(this.object);
+        this.object.setRotationFromMatrix(this.startQ.matrix);
       },
       undefined,
       function (error) {
@@ -139,9 +139,12 @@ class QuaternionWindow extends Window {
     this.animationFolder.open();
 
     // animation
+    this.startQ = new QuaternionAngle(0, 0, 1, 0);
     this.resetAnimation();
     this.arrowHelper = null;
     this.rotationArrow = null;
+    this.test = null;
+    this.test2 = null;
     this.visualizeQuaternions();
   }
 
@@ -150,12 +153,12 @@ class QuaternionWindow extends Window {
    */
   resetAnimation() {
     this.sum = 0;
-    this.prevQ = new QuaternionAngle(0, 1, 0, 0);
-    this.curQ = this.quaternions[0].quaternion;
+    this.cur = 0;
     this.prevT = 0;
     this.first = true;
-    this.cur = 1;
     this.sumQ = 0;
+    this.curQ = this.startQ;
+    this.nextQ = this.curQ.multiply(this.quaternions[this.cur].quaternion);
   }
   /**
    * Angle based quaternions need to be updated if values changed
@@ -167,30 +170,72 @@ class QuaternionWindow extends Window {
     });
   }
   visualizeQuaternions() {
+    let current = this.quaternions[this.cur].quaternion;
     let origin = new Vector3(0, 0, 0);
-    let direction = new Vector3().copy(this.curQ.a);
-    let length = 1;
+    let direction = new Vector3().copy(current.getRotationAxis());
+    let length = direction.length();
     if (this.arrowHelper != null) {
       this.scene.remove(this.arrowHelper);
       delete this.arrowHelper;
       this.scene.remove(this.rotationArrow);
       delete this.rotationArrow;
+      this.scene.remove(this.test);
+      delete this.test;
+      this.scene.remove(this.test2);
+      delete this.test2;
     }
     this.arrowHelper = new ArrowHelper(
-      direction.normalize(),
+      direction,
       origin,
       length,
       ROTATION_AXIS_COLOR
     );
-    this.curve = new EllipseCurve(0, 0, 1, 1, 0, this.curQ.theta, false);
-    const points = this.curve.getPoints(50);
+    //
+    let start = new Vector3().copy(this.startQ.getRotationAxis());
+    start.applyMatrix4(this.curQ.matrix);
+
+    let rotationAxis = new Vector3().copy(current.getRotationAxis());
+    start.sub(
+      rotationAxis.multiplyScalar(new Vector3().copy(start).dot(rotationAxis))
+    );
+    rotationAxis = new Vector3().copy(current.getRotationAxis());
+    let endQ = new QuaternionAngle(
+      current.getTheta(),
+      rotationAxis.x,
+      rotationAxis.y,
+      rotationAxis.z
+    );
+
+    start.normalize();
+    let end = new Vector3().copy(start);
+    end.applyMatrix4(endQ.matrix);
+    end.normalize();
+
+    const steps = 50;
+    let omega = current.getTheta();
+    let points = [start];
+    for (let i = 1; i < steps - 1; i++) {
+      let t = i / steps;
+      let p_0 = new Vector3().copy(start);
+      let p_1 = new Vector3().copy(end);
+      points.push(
+        p_0
+          .multiplyScalar(Math.sin((1 - t) * omega) / Math.sin(omega))
+          .add(p_1.multiplyScalar(Math.sin(t * omega) / Math.sin(omega)))
+      );
+    }
+    points.push(end);
     const geometry = new BufferGeometry().setFromPoints(points);
-
     const material = new LineBasicMaterial({ color: 0xff0000 });
-
     this.rotationArrow = new Line(geometry, material);
-    this.scene.add(this.arrowHelper);
+
+    this.arrowHelper.applyMatrix4(this.curQ.matrix);
+    this.rotationArrow.applyMatrix4(this.curQ.matrix);
+
+    this.scene.add(this.test);
+    this.scene.add(this.test2);
     this.scene.add(this.rotationArrow);
+    this.scene.add(this.arrowHelper);
   }
   /**
    * Animates the given object with the given quaternions, distributes time evenly quaternions
@@ -203,6 +248,7 @@ class QuaternionWindow extends Window {
         this.prevT = time;
         this.first = false;
         this.updateQuaternions();
+        this.visualizeQuaternions();
       }
       // calculate progress of animation
       let delta = time - this.prevT;
@@ -212,24 +258,23 @@ class QuaternionWindow extends Window {
       // restart animation
       if (this.sum > this.options.animationTime) {
         this.resetAnimation();
-        this.visualizeQuaternions();
         return;
       }
       // check if share of quaternions time has been exceeded and go to next quaternion
       if (
         this.sum >
-        this.cur * (this.options.animationTime / this.quaternions.length)
+        (this.cur + 1) * (this.options.animationTime / this.quaternions.length)
       ) {
-        this.prevQ = this.curQ;
-        this.curQ = this.quaternions[this.cur].quaternion;
         this.cur++;
+        this.curQ = this.nextQ;
+        this.nextQ = this.curQ.multiply(this.quaternions[this.cur].quaternion);
         this.sumQ = 0;
         this.visualizeQuaternions();
       }
       // interpolate between quaternions based on t
       let t =
         this.sumQ / (this.options.animationTime / this.quaternions.length);
-      let pos = this.prevQ.slerp(this.curQ, t);
+      let pos = this.curQ.slerp(this.nextQ, t);
       this.object.setRotationFromMatrix(pos.matrix);
     }
   }
@@ -262,7 +307,8 @@ class QuaternionWindow extends Window {
         this.quaternions[this.count() - 1].quaternion.a,
         "x",
         MIN_AXIS_VALUE,
-        MAX_AXIS_VALUE
+        MAX_AXIS_VALUE,
+        AXIS_STEP_SIZE
       )
       .name("X")
       .listen();
@@ -271,7 +317,8 @@ class QuaternionWindow extends Window {
         this.quaternions[this.count() - 1].quaternion.a,
         "y",
         MIN_AXIS_VALUE,
-        MAX_AXIS_VALUE
+        MAX_AXIS_VALUE,
+        AXIS_STEP_SIZE
       )
       .name("Y")
       .listen();
@@ -280,7 +327,8 @@ class QuaternionWindow extends Window {
         this.quaternions[this.count() - 1].quaternion.a,
         "z",
         MIN_AXIS_VALUE,
-        MAX_AXIS_VALUE
+        MAX_AXIS_VALUE,
+        AXIS_STEP_SIZE
       )
       .name("Z")
       .listen();
