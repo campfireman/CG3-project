@@ -23,6 +23,8 @@ var globalOptions = {
   window: 0,
 };
 
+var lastTme = 0;
+
 for (let i = 0; i < windowInstances.length; i++) {
   windowInstances[i].getGUI().hide();
 }
@@ -48,7 +50,8 @@ document
   .appendChild(windowsSelectGui.domElement);
 
 function animate(time) {
-  currentWindow.update(time);
+  currentWindow.update(time - lastTme);
+  lastTme = time;
 
   renderer.render(currentWindow.getScene(), currentWindow.getCamera());
 
