@@ -36,7 +36,6 @@ var animating = false;
 var dragging = false;
 var casteljauLines = [];
 var casteljauPoints = [];
-
 var guiOptions = {
 	animationSpeed: 0.0005,
 	animationProgress: 0,
