@@ -232,8 +232,6 @@ class QuaternionWindow extends Window {
     this.arrowHelper.applyMatrix4(this.curQ.matrix);
     this.rotationArrow.applyMatrix4(this.curQ.matrix);
 
-    this.scene.add(this.test);
-    this.scene.add(this.test2);
     this.scene.add(this.rotationArrow);
     this.scene.add(this.arrowHelper);
   }
