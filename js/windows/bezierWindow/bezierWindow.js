@@ -33,7 +33,6 @@ const PASCALS_TRIANGLE = [
 var bernsteinCurvesCache = [];
 
 var animating = false;
-var dragging = false;
 var casteljauLines = [];
 var casteljauPoints = [];
 var guiOptions = {
@@ -41,14 +40,7 @@ var guiOptions = {
 	animationProgress: 0,
 	animate: function() {
 		animating = true;
-		dragging = false;
 		guiOptions.animationProgress = 0;
-		/*for(let i = 0; i < casteljauLines.length; i++) {
-			for(let j = 0; j < casteljauLines[i].length; j++) {
-				casteljauLines[i][j].visible = true;
-				casteljauPoints[i][j].visible = true;
-			}
-		}*/
 	}
 }
 
@@ -63,11 +55,6 @@ class BezierWindow extends Window {
 		var windowFolder = this.gui.addFolder("animation");
 		windowFolder.add(guiOptions, "animationSpeed", 0.00001, 0.001);
 		this.progressSlider = windowFolder.add(guiOptions, "animationProgress", 0.0, 1.0).step(0.001);
-		this.progressSlider.onChange((newValue) => {
-			if(!animating) {
-				dragging = true;
-			}
-		});
 
 		windowFolder.add(guiOptions, "animate");
 
@@ -185,7 +172,7 @@ class BezierWindow extends Window {
 
 	update(time) {
 		this.renderer.clearDepth();
-		//console.log(animating + "  " + dragging);
+
 		if(animating) {
 			this.updateBezierCurve(guiOptions.animationProgress);
 
@@ -197,8 +184,6 @@ class BezierWindow extends Window {
 			if(guiOptions.animationProgress >= 1) {
 				this.updateBezierCurve(guiOptions.animationProgress);
 				animating = false;
-				//guiOptions.animationProgress = 0;
-				//this.progressSlider.setValue(guiOptions.animationProgress);
 			}
 
 		} else {
@@ -238,27 +223,22 @@ class BezierWindow extends Window {
 
 		for (let i = initialLength - 1; i >= 1; i--) {
 			for (let j = 0; j < i; j++) {
-				if(animating || dragging) {
-					casteljauLines[i-1][j].geometry.setPositions([vectors[j].x,vectors[j].y,vectors[j].z, vectors[j+1].x,vectors[j+1].y,vectors[j+1].z]);
-				}
+				
+				casteljauLines[i-1][j].geometry.setPositions([vectors[j].x,vectors[j].y,vectors[j].z, vectors[j+1].x,vectors[j+1].y,vectors[j+1].z]);
 
 				vectors[j].lerp(vectors[j + 1], t);
 
-				if(animating || dragging) {
-					casteljauPoints[i-1][j].position.x = vectors[j].x
-					casteljauPoints[i-1][j].position.y = vectors[j].y
-					casteljauPoints[i-1][j].position.z = vectors[j].z
-				}
+				casteljauPoints[i-1][j].position.x = vectors[j].x
+				casteljauPoints[i-1][j].position.y = vectors[j].y
+				casteljauPoints[i-1][j].position.z = vectors[j].z
 			}
 		}
 
-		if(animating || dragging) {
-			let maxBernsteinIndex = this.getMaxBernsteinIndex(t);
-			let color = BERSTEIN_COLORS[maxBernsteinIndex];
-			casteljauPoints[0][0].material.color.r = color.r;
-			casteljauPoints[0][0].material.color.g = color.g;
-			casteljauPoints[0][0].material.color.b = color.b;
-		}
+		let maxBernsteinIndex = this.getMaxBernsteinIndex(t);
+		let color = BERSTEIN_COLORS[maxBernsteinIndex];
+		casteljauPoints[0][0].material.color.r = color.r;
+		casteljauPoints[0][0].material.color.g = color.g;
+		casteljauPoints[0][0].material.color.b = color.b;
 	}
 
 	bezier(points, t) {
