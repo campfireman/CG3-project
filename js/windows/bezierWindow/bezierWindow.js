@@ -185,23 +185,25 @@ class BezierWindow extends Window {
 
 	update(time) {
 		this.renderer.clearDepth();
-		
-		if(animating || dragging) {
+		//console.log(animating + "  " + dragging);
+		if(animating) {
 			this.updateBezierCurve(guiOptions.animationProgress);
 
-			if (animating) {
-				guiOptions.animationProgress += guiOptions.animationSpeed * time;
-				this.progressSlider.setValue(guiOptions.animationProgress);
-			
-				if(guiOptions.animationProgress >= 1) {
-					this.updateBezierCurve(guiOptions.animationProgress);
-					animating = false;
-					guiOptions.animationProgress = 0;
-					this.progressSlider.setValue(guiOptions.animationProgress);
-				}
+			this.updateBezierControls(this.controlPoints, guiOptions.animationProgress);
+
+			guiOptions.animationProgress += guiOptions.animationSpeed * time;
+			this.progressSlider.setValue(guiOptions.animationProgress);
+		
+			if(guiOptions.animationProgress >= 1) {
+				this.updateBezierCurve(guiOptions.animationProgress);
+				animating = false;
+				//guiOptions.animationProgress = 0;
+				//this.progressSlider.setValue(guiOptions.animationProgress);
 			}
+
 		} else {
 			this.updateBezierCurve(1);
+			this.updateBezierControls(this.controlPoints, guiOptions.animationProgress);
 		}
 		
 	}
@@ -227,7 +229,7 @@ class BezierWindow extends Window {
 		this.line.geometry.setColors(colors);
 	}
 
-	bezier(points, t) {
+	updateBezierControls(points, t) {
 		let initialLength = points.length;
 		let vectors = [];
 		for (let i = 0; i < points.length; i++) {
@@ -257,7 +259,20 @@ class BezierWindow extends Window {
 			casteljauPoints[0][0].material.color.g = color.g;
 			casteljauPoints[0][0].material.color.b = color.b;
 		}
+	}
 
+	bezier(points, t) {
+		let initialLength = points.length;
+		let vectors = [];
+		for (let i = 0; i < points.length; i++) {
+			vectors.push(points[i].position.clone());
+		}
+
+		for (let i = initialLength - 1; i >= 1; i--) {
+			for (let j = 0; j < i; j++) {
+				vectors[j].lerp(vectors[j + 1], t);
+			}
+		}
 		return vectors[0];
 	}
 
