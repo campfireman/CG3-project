@@ -217,7 +217,7 @@ class QuaternionWindow extends Window {
       rotationAxis.z
     );
     let dot = -new Vector3().copy(start).dot(rotationAxis);
-    if (Math.abs(1 - dot) < 0.01) {
+    if (1 - Math.abs(dot) < 0.02) {
       // if start is (roughly) perpendicular to rotation axis, use direction object is looking into (assuming z direction)
       start = new Vector3(0, 0, 1).applyMatrix4(this.curQ.matrix);
     } else {
