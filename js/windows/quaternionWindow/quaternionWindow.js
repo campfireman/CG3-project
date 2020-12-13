@@ -170,6 +170,9 @@ class QuaternionWindow extends Window {
       val.quaternion.updateValues();
     });
   }
+  /**
+   * inserts objects into scene to visualize the quaternions specified by the user
+   */
   visualizeQuaternions() {
     // cleanup old visualiziation
     if (this.rotationAxisArrow != null) {
@@ -209,8 +212,10 @@ class QuaternionWindow extends Window {
     );
     let dot = -new Vector3().copy(start).dot(rotationAxis);
     if (Math.abs(1 - dot) < 0.01) {
+      // if start is (roughly) perpendicular to rotation axis, use direction object is looking into (assuming z direction)
       start = new Vector3(0, 0, 1).applyMatrix4(this.curQ.matrix);
     } else {
+      // else move start into the layer of the rotation axis
       start.add(rotationAxis.multiplyScalar(dot));
     }
 
