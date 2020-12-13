@@ -141,7 +141,7 @@ class QuaternionWindow extends Window {
     // animation
     this.startQ = new QuaternionAngle(0, 0, 1, 0);
     this.resetAnimation();
-    this.arrowHelper = null;
+    this.rotationAxis = null;
     this.rotationArrow = null;
     this.test = null;
     this.test2 = null;
@@ -171,9 +171,9 @@ class QuaternionWindow extends Window {
   }
   visualizeQuaternions() {
     // cleanup old visualiziation
-    if (this.arrowHelper != null) {
-      this.scene.remove(this.arrowHelper);
-      delete this.arrowHelper;
+    if (this.rotationAxis != null) {
+      this.scene.remove(this.rotationAxis);
+      delete this.rotationAxis;
       this.scene.remove(this.rotationArrow);
       delete this.rotationArrow;
       this.scene.remove(this.test);
@@ -185,7 +185,7 @@ class QuaternionWindow extends Window {
     let origin = new Vector3(0, 0, 0);
     let direction = new Vector3().copy(current.getRotationAxis());
     let length = direction.length();
-    this.arrowHelper = new ArrowHelper(
+    this.rotationAxis = new ArrowHelper(
       direction,
       origin,
       length,
@@ -244,7 +244,7 @@ class QuaternionWindow extends Window {
     const material = new LineBasicMaterial({ color: 0xff0000 });
     this.rotationArrow = new Line(geometry, material);
 
-    this.arrowHelper.applyMatrix4(this.curQ.matrix);
+    this.rotationAxis.applyMatrix4(this.curQ.matrix);
     this.rotationArrow.applyMatrix4(this.curQ.matrix);
     this.test.applyMatrix4(this.curQ.matrix);
     this.test2.applyMatrix4(this.curQ.matrix);
@@ -252,7 +252,7 @@ class QuaternionWindow extends Window {
     this.scene.add(this.test);
     this.scene.add(this.test2);
     this.scene.add(this.rotationArrow);
-    this.scene.add(this.arrowHelper);
+    this.scene.add(this.rotationAxis);
   }
   /**
    * Animates the given object with the given quaternions, distributes time evenly quaternions
