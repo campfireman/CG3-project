@@ -31,6 +31,7 @@ const DEFAULT_ANIMATION_TIME = 2000;
 
 const QUATERNION_RAND_INTERVAL = 2;
 const ROTATION_AXIS_COLOR = 0x66d9ef;
+const ROTATION_ARROW_COLOR = 0xff0000;
 
 class QuaternionWindow extends Window {
   constructor(renderer) {
@@ -207,10 +208,8 @@ class QuaternionWindow extends Window {
       rotationAxis.z
     );
     let dot = -new Vector3().copy(start).dot(rotationAxis);
-    if (Math.abs(dot) == 1) {
-      start = new Vector3(0, 0, 1);
-    } else if (Math.abs(dot) == 0) {
-      console.log("hello");
+    if (Math.abs(1 - dot) < 0.01) {
+      start = new Vector3(0, 0, 1).applyMatrix4(this.curQ.matrix);
     } else {
       start.add(rotationAxis.multiplyScalar(dot));
     }
@@ -232,6 +231,7 @@ class QuaternionWindow extends Window {
       0x0000ff
     );
 
+    // Interpolate between rotation start and end with SLERP to indicate rotation around axis
     const steps = 50;
     let omega = current.getTheta();
     let points = [start.x, start.y, start.z];
@@ -250,7 +250,7 @@ class QuaternionWindow extends Window {
     geometry.setPositions(points);
     let material = new LineMaterial({
       linewidth: 0.0012,
-      color: 0xff0000,
+      color: ROTATION_ARROW_COLOR,
     });
     this.rotationArrowLine = new Line2(geometry, material);
     let l = new Vector3(0, 0, 0).copy(end).sub(lastP).length();
@@ -258,7 +258,7 @@ class QuaternionWindow extends Window {
       new Vector3(0, 0, 0).copy(end).sub(lastP).normalize(),
       lastP,
       l,
-      0xff0000,
+      ROTATION_ARROW_COLOR,
       l,
       0.05
     );
