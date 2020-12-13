@@ -242,10 +242,8 @@ class QuaternionWindow extends Window {
       points.push(p.x, p.y, p.z);
       lastP = p;
     }
-    // points.push(end);
     const geometry = new LineGeometry();
     geometry.setPositions(points);
-    // const material = new LineBasicMaterial({ color: 0xff0000 });
     let material = new LineMaterial({
       linewidth: 0.0012,
       color: 0xff0000,
