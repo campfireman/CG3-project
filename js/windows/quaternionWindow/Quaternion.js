@@ -92,11 +92,11 @@ class QuaternionBase {
   negate() {
     return new QuaternionBase(-this.s, -this.x, -this.y, -this.z);
   }
-  length() {
-    return Math.sqrt(
-      Math.pow(this.s, 2),
-      Math.pow(this.x, 2),
-      Math.pow(this.y, 2),
+  magnitude() {
+    return (
+      Math.pow(this.s, 2) +
+      Math.pow(this.x, 2) +
+      Math.pow(this.y, 2) +
       Math.pow(this.z, 2)
     );
   }
