@@ -38,6 +38,7 @@ class QuaternionWindow extends Window {
     super(renderer);
     // holds the quaternion's gui folder and it's representation
     this.quaternions = [];
+    this.guiValues = [];
     // all attributes and functions related to the GUI
     this.options = {
       animate: false,
@@ -61,6 +62,7 @@ class QuaternionWindow extends Window {
         );
         delete this.quaternions[this.count() - 1];
         this.quaternions.pop();
+        this.guiValues.pop();
         if (this.count() > 0) {
           this.quaternions[this.count() - 1].folder.open();
         }
@@ -166,7 +168,12 @@ class QuaternionWindow extends Window {
    * For compatibility with dat.GUI all quaternions are updated regardless if they changed or not
    */
   updateQuaternions() {
-    this.quaternions.forEach((val) => {
+    this.quaternions.forEach((val, index) => {
+      let newValues = this.guiValues[index];
+      val.quaternion.a.x = newValues.x;
+      val.quaternion.a.y = newValues.y;
+      val.quaternion.a.z = newValues.z;
+      val.quaternion.theta = newValues.theta;
       val.quaternion.updateValues();
     });
   }
@@ -339,45 +346,55 @@ class QuaternionWindow extends Window {
       quaternion: new QuaternionAngle(DEFAULT_THETA_VALUE, x, y, z),
     };
     this.quaternions.push(attributes);
+    this.guiValues.push({
+      x,
+      y,
+      z,
+      theta: DEFAULT_THETA_VALUE,
+    });
     newQuaternionFolder
       .add(
-        this.quaternions[this.count() - 1].quaternion.a,
+        this.guiValues[this.guiValues.length - 1],
         "x",
         MIN_AXIS_VALUE,
         MAX_AXIS_VALUE,
         AXIS_STEP_SIZE
       )
       .name("X")
-      .listen();
+      .listen()
+      .onChange(() => this.resetAnimation());
     newQuaternionFolder
       .add(
-        this.quaternions[this.count() - 1].quaternion.a,
+        this.guiValues[this.guiValues.length - 1],
         "y",
         MIN_AXIS_VALUE,
         MAX_AXIS_VALUE,
         AXIS_STEP_SIZE
       )
       .name("Y")
-      .listen();
+      .listen()
+      .onChange(() => this.resetAnimation());
     newQuaternionFolder
       .add(
-        this.quaternions[this.count() - 1].quaternion.a,
+        this.guiValues[this.guiValues.length - 1],
         "z",
         MIN_AXIS_VALUE,
         MAX_AXIS_VALUE,
         AXIS_STEP_SIZE
       )
       .name("Z")
-      .listen();
+      .listen()
+      .onChange(() => this.resetAnimation());
     newQuaternionFolder
       .add(
-        this.quaternions[this.count() - 1].quaternion,
+        this.guiValues[this.guiValues.length - 1],
         "theta",
         MIN_THETA_VALUE,
         MAX_THETA_VALUE
       )
       .name("Theta")
-      .listen();
+      .listen()
+      .onChange(() => this.resetAnimation());
     newQuaternionFolder.open();
   }
   getScene() {

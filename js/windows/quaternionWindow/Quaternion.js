@@ -147,11 +147,11 @@ class QuaternionAngle extends QuaternionBase {
   updateValues() {
     this.s = Math.cos(this.theta / 2);
     let angle = Math.sin(this.theta / 2);
+    this.a.normalize();
     this.x = this.a.x * angle;
     this.y = this.a.y * angle;
     this.z = this.a.z * angle;
     this.updateMatrix();
-    this.a.normalize();
   }
   getRotationAxis() {
     return this.a;
