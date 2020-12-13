@@ -170,10 +170,7 @@ class QuaternionWindow extends Window {
     });
   }
   visualizeQuaternions() {
-    let current = this.quaternions[this.cur].quaternion;
-    let origin = new Vector3(0, 0, 0);
-    let direction = new Vector3().copy(current.getRotationAxis());
-    let length = direction.length();
+    // cleanup old visualiziation
     if (this.arrowHelper != null) {
       this.scene.remove(this.arrowHelper);
       delete this.arrowHelper;
@@ -184,6 +181,10 @@ class QuaternionWindow extends Window {
       this.scene.remove(this.test2);
       delete this.test2;
     }
+    let current = this.quaternions[this.cur].quaternion;
+    let origin = new Vector3(0, 0, 0);
+    let direction = new Vector3().copy(current.getRotationAxis());
+    let length = direction.length();
     this.arrowHelper = new ArrowHelper(
       direction,
       origin,
@@ -191,25 +192,39 @@ class QuaternionWindow extends Window {
       ROTATION_AXIS_COLOR
     );
     //
-    let start = new Vector3().copy(this.startQ.getRotationAxis());
+    let start = new Vector3().copy(new Vector3(0, 1, 0));
     start.applyMatrix4(this.curQ.matrix);
 
     let rotationAxis = new Vector3().copy(current.getRotationAxis());
-    start.sub(
-      rotationAxis.multiplyScalar(new Vector3().copy(start).dot(rotationAxis))
-    );
-    rotationAxis = new Vector3().copy(current.getRotationAxis());
     let endQ = new QuaternionAngle(
       current.getTheta(),
       rotationAxis.x,
       rotationAxis.y,
       rotationAxis.z
     );
+    let dot = -new Vector3().copy(start).dot(rotationAxis);
+    if (Math.abs(dot) == 1) {
+      start = new Vector3(0, 0, 1);
+    } else {
+      start.add(rotationAxis.multiplyScalar(dot));
+    }
 
     start.normalize();
     let end = new Vector3().copy(start);
     end.applyMatrix4(endQ.matrix);
     end.normalize();
+    this.test = new ArrowHelper(
+      new Vector3(0, 0, 0).copy(start),
+      new Vector3(0, 0, 0),
+      length,
+      0x00ff00
+    );
+    this.test2 = new ArrowHelper(
+      new Vector3(0, 0, 0).copy(end),
+      new Vector3(0, 0, 0),
+      length,
+      0x0000ff
+    );
 
     const steps = 50;
     let omega = current.getTheta();
@@ -231,7 +246,11 @@ class QuaternionWindow extends Window {
 
     this.arrowHelper.applyMatrix4(this.curQ.matrix);
     this.rotationArrow.applyMatrix4(this.curQ.matrix);
+    this.test.applyMatrix4(this.curQ.matrix);
+    this.test2.applyMatrix4(this.curQ.matrix);
 
+    this.scene.add(this.test);
+    this.scene.add(this.test2);
     this.scene.add(this.rotationArrow);
     this.scene.add(this.arrowHelper);
   }
