@@ -15,7 +15,7 @@ class Window {
     throw new TypeError("Must override method");
   }
 
-  update(time) {
+  update(delta_t) {
     throw new TypeError("Must override method");
   }
 }

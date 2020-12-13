@@ -157,7 +157,6 @@ class QuaternionWindow extends Window {
   resetAnimation() {
     this.sum = 0;
     this.cur = 0;
-    this.prevT = 0;
     this.first = true;
     this.sumQ = 0;
     this.curQ = this.startQ;
@@ -283,22 +282,19 @@ class QuaternionWindow extends Window {
   }
   /**
    * Animates the given object with the given quaternions, distributes time evenly quaternions
-   * @param {int} time milliseconds since start
+   * @param {int} delta_t milliseconds since last frame
    */
-  update(time) {
+  update(delta_t) {
     if (this.object != null && this.options.animate) {
       // fencepost: if animation just started set values
       if (this.first) {
-        this.prevT = time;
         this.first = false;
         this.updateQuaternions();
         this.visualizeQuaternions();
       }
       // calculate progress of animation
-      let delta = time - this.prevT;
-      this.prevT = time;
-      this.sum += delta;
-      this.sumQ += delta;
+      this.sum += delta_t;
+      this.sumQ += delta_t;
       // restart animation
       if (this.sum > this.options.animationTime) {
         this.resetAnimation();
