@@ -3,10 +3,7 @@ import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
 import {
   AmbientLight,
   ArrowHelper,
-  BufferGeometry,
   GridHelper,
-  Line,
-  LineBasicMaterial,
   PerspectiveCamera,
   Scene,
   Vector3,
@@ -14,7 +11,9 @@ import {
 import { Window } from "../window.js";
 import { QuaternionAngle } from "./Quaternion.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
-
+import { Line2 } from "/jsm/lines/Line2.js";
+import { LineGeometry } from "/jsm/lines/LineGeometry.js";
+import { LineMaterial } from "/jsm/lines/LineMaterial.js";
 const MODEL_PATH = "../../../models/";
 
 const MIN_AXIS_VALUE = -10.0;
@@ -142,7 +141,8 @@ class QuaternionWindow extends Window {
     this.startQ = new QuaternionAngle(0, 0, 1, 0);
     this.resetAnimation();
     this.rotationAxis = null;
-    this.rotationArrow = null;
+    this.rotationArrowLine = null;
+    this.rotationArrowTip = null;
     this.test = null;
     this.test2 = null;
     this.visualizeQuaternions();
@@ -174,8 +174,10 @@ class QuaternionWindow extends Window {
     if (this.rotationAxis != null) {
       this.scene.remove(this.rotationAxis);
       delete this.rotationAxis;
-      this.scene.remove(this.rotationArrow);
-      delete this.rotationArrow;
+      this.scene.remove(this.rotationArrowLine);
+      delete this.rotationArrowLine;
+      this.scene.remove(this.rotationArrowTip);
+      delete this.rotationArrowTip;
       this.scene.remove(this.test);
       delete this.test;
       this.scene.remove(this.test2);
@@ -228,30 +230,47 @@ class QuaternionWindow extends Window {
 
     const steps = 50;
     let omega = current.getTheta();
-    let points = [start];
+    let points = [start.x, start.y, start.z];
+    let lastP;
     for (let i = 1; i < steps - 1; i++) {
       let t = i / steps;
       let p_0 = new Vector3().copy(start);
       let p_1 = new Vector3().copy(end);
-      points.push(
-        p_0
-          .multiplyScalar(Math.sin((1 - t) * omega) / Math.sin(omega))
-          .add(p_1.multiplyScalar(Math.sin(t * omega) / Math.sin(omega)))
-      );
+      let p = p_0
+        .multiplyScalar(Math.sin((1 - t) * omega) / Math.sin(omega))
+        .add(p_1.multiplyScalar(Math.sin(t * omega) / Math.sin(omega)));
+      points.push(p.x, p.y, p.z);
+      lastP = p;
     }
-    points.push(end);
-    const geometry = new BufferGeometry().setFromPoints(points);
-    const material = new LineBasicMaterial({ color: 0xff0000 });
-    this.rotationArrow = new Line(geometry, material);
+    // points.push(end);
+    const geometry = new LineGeometry();
+    geometry.setPositions(points);
+    // const material = new LineBasicMaterial({ color: 0xff0000 });
+    let material = new LineMaterial({
+      linewidth: 0.0012,
+      color: 0xff0000,
+    });
+    this.rotationArrowLine = new Line2(geometry, material);
+    let l = new Vector3(0, 0, 0).copy(end).sub(lastP).length();
+    this.rotationArrowTip = new ArrowHelper(
+      new Vector3(0, 0, 0).copy(end).sub(lastP).normalize(),
+      lastP,
+      l,
+      0xff0000,
+      l,
+      0.05
+    );
 
     this.rotationAxis.applyMatrix4(this.curQ.matrix);
-    this.rotationArrow.applyMatrix4(this.curQ.matrix);
+    this.rotationArrowLine.applyMatrix4(this.curQ.matrix);
+    this.rotationArrowTip.applyMatrix4(this.curQ.matrix);
     this.test.applyMatrix4(this.curQ.matrix);
     this.test2.applyMatrix4(this.curQ.matrix);
 
     this.scene.add(this.test);
     this.scene.add(this.test2);
-    this.scene.add(this.rotationArrow);
+    this.scene.add(this.rotationArrowLine);
+    this.scene.add(this.rotationArrowTip);
     this.scene.add(this.rotationAxis);
   }
   /**
