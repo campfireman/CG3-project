@@ -4,6 +4,7 @@ import * as DAT from "/dat/dat.gui.module.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
 import { Window } from "../window.js";
+import { Cloth } from "./Cloth.js";
 
 var guiOptions = {
     animationSpeed: 0.0005
@@ -35,10 +36,21 @@ class ClothWindow extends Window {
         this.orbitControls.update();
         this.orbitControls.enabled = true;
 
+        let size = 20;
+        let partDistance = 0.2;
+        let partMass = 0.1;
+        let toughness = 0.01;
+
+        this.cloth = new Cloth(this.scene, size, size, new THREE.Vector3(-size * partDistance / 2, 0.5, 0), partDistance, partMass, toughness);
     }
 
     update(time) {
         this.renderer.clearDepth();
+
+        this.cloth.applyForceUniform(new THREE.Vector3(0, -0.001, 0));
+
+        this.cloth.update(time);
+        
     }
 
     getScene() {

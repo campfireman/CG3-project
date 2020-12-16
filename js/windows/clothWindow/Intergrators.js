@@ -1,10 +1,10 @@
 
 
-function integrateEuler(x, dx, dt) {
-    let xCopy = x.clone();
-    let dxCopy = dx.clone();
+function integrateEuler(xOrg, dxOrg, dt) {
+    let x = xOrg.clone();
+    let dx = dxOrg.clone();
 
-    return xCopy.add(dxCopy.multiplyScalar(dt));
+    return x.add(dx.multiplyScalar(dt));
 }
 
 
