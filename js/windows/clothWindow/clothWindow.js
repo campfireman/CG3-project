@@ -10,6 +10,20 @@ var guiOptions = {
     animationSpeed: 0.0005
 }
 
+/**
+ * TODO
+ *  licht                       Ture
+ *  gui                         Albert
+ *  controls (tuch anheben)     Albert
+ *  fixed points (gui)          Albert
+ *  triangle mesh (coloring)    
+ *  shear bend springs          Ture
+ *  more intergrtors            Ture
+ *  adaptive steps
+ *  spring visualizing
+ *  wind
+ */
+
 class ClothWindow extends Window {
     constructor(renderer) {
         super(renderer);
@@ -24,6 +38,10 @@ class ClothWindow extends Window {
         this.scene = new THREE.Scene();
         this.scene.add(new THREE.GridHelper(50, 20));
 
+        const light = new THREE.PointLight( 0xff0000, 1, 100 );
+        light.position.set( 0, 10, 0 );
+        this.scene.add( light );
+
         this.camera = new THREE.PerspectiveCamera(
 			75,
 			window.innerWidth / window.innerHeight,
@@ -36,10 +54,10 @@ class ClothWindow extends Window {
         this.orbitControls.update();
         this.orbitControls.enabled = true;
 
-        let size = 20;
-        let partDistance = 0.2;
-        let partMass = 0.1;
-        let toughness = 0.01;
+        let size = 50;
+        let partDistance = 0.1;
+        let partMass = 1.0;
+        let toughness = 10;
 
         this.cloth = new Cloth(this.scene, size, size, new THREE.Vector3(-size * partDistance / 2, 0.5, 0), partDistance, partMass, toughness);
     }
@@ -47,7 +65,7 @@ class ClothWindow extends Window {
     update(time) {
         this.renderer.clearDepth();
 
-        this.cloth.applyForceUniform(new THREE.Vector3(0, -0.001, 0));
+        this.cloth.applyForceUniform(new THREE.Vector3(0, -10, 0));
 
         this.cloth.update(time);
         

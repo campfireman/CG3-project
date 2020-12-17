@@ -5,7 +5,7 @@ import * as INTEGRATORS from "./Intergrators.js";
 const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 32);
 const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xcf1120 });
 
-const AIR_RESISTANCE = 0.5;
+const AIR_RESISTANCE = 10;
 
 class Particle {
 
@@ -32,8 +32,8 @@ class Particle {
 
         this.applyForce(drag);
         
-        this.pos = INTEGRATORS.integrateEuler(this.pos, this.vel, dt / 100);
-        this.vel = INTEGRATORS.integrateEuler(this.vel, this.acc, dt / 100);
+        this.pos = INTEGRATORS.integrateEuler(this.pos, this.vel, dt);
+        this.vel = INTEGRATORS.integrateEuler(this.vel, this.acc, dt);
         
         this.acc.multiplyScalar(0);
 
