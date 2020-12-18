@@ -21,6 +21,7 @@ class Particle {
         this.sphere.position.x = this.pos.x;
         this.sphere.position.y = this.pos.y;
         this.sphere.position.z = this.pos.z;
+        this.sphere.particle = this;
         scene.add(this.sphere);
     }
 

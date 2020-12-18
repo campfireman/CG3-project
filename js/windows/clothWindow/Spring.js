@@ -25,6 +25,10 @@ class Spring {
         this.restLength = newLength;
     }
 
+    setSpringConstant(newSpringKonstant) {
+        this.springKonstant = newSpringKonstant;
+    }
+
 }
 
 export { Spring };
