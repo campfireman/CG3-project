@@ -227,10 +227,10 @@ class QuaternionWindow extends Window {
       delete this.rotationStart;
       this.scene.remove(this.rotationEnd);
       delete this.rotationEnd;
-      this.scene.remove(this.startP);
-      delete this.startP;
-      this.scene.remove(this.endP);
-      delete this.endP;
+      this.scene.remove(this.interpolationStart);
+      delete this.interpolationStart;
+      this.scene.remove(this.interpolationEnd);
+      delete this.interpolationEnd;
     }
     let current = this.quaternions[this.cur].quaternion;
     let origin = new Vector3(0, 0, 0);
@@ -330,7 +330,7 @@ class QuaternionWindow extends Window {
       color: 0x00ff00,
       opacity: 1,
     });
-    this.startP = new Mesh(startPGeometry, startPMaterial);
+    this.interpolationStart = new Mesh(startPGeometry, startPMaterial);
 
     new_pos = this.project(
       this.projectionPoint,
@@ -350,10 +350,10 @@ class QuaternionWindow extends Window {
       color: 0x0000ff,
       opacity: 1,
     });
-    this.endP = new Mesh(endPGeometry, endPMaterial);
+    this.interpolationEnd = new Mesh(endPGeometry, endPMaterial);
 
-    this.scene.add(this.startP);
-    this.scene.add(this.endP);
+    this.scene.add(this.interpolationStart);
+    this.scene.add(this.interpolationEnd);
 
     this.scene.add(this.rotationStart);
     this.scene.add(this.rotationEnd);
