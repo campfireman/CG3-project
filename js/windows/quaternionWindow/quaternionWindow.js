@@ -39,6 +39,10 @@ const POINT_MARKER_RADIUS = 0.04;
 const POINT_SEGMENT_WIDTH = 12;
 const POINT_SEGMENT_HEIGHT = 12;
 
+const I_AXIS_COLOR = 0xffffff;
+const J_AXIS_COLOR = 0xffffff;
+const K_AXIS_COLOR = 0xffffff;
+
 class QuaternionWindow extends Window {
   constructor(renderer) {
     super(renderer);
@@ -118,9 +122,8 @@ class QuaternionWindow extends Window {
     );
 
     this.interpolationPath = [];
-    this.interpolationPathLine = null;
 
-    this.sphereRadius = 2;
+    this.sphereRadius = 1;
     this.sphereCenter = new Vector3(0, 0, 0);
     this.projectionPoint = new Vector3(0, 0, 0);
     const sgeometry = new SphereGeometry(this.sphereRadius, 32, 32);
@@ -131,6 +134,17 @@ class QuaternionWindow extends Window {
     });
     this.sphere = new Mesh(sgeometry, smaterial);
     this.scene.add(this.sphere);
+    this.sphere.translateX(2.5);
+
+    let origin = new Vector3(0, 0, 0);
+    this.iAxis = new ArrowHelper(new Vector3(1, 0, 0), origin, 2, I_AXIS_COLOR);
+    this.jAxis = new ArrowHelper(new Vector3(0, 1, 0), origin, 2, J_AXIS_COLOR);
+    this.kAxis = new ArrowHelper(new Vector3(0, 0, 1), origin, 2, K_AXIS_COLOR);
+    this.sphere.add(this.iAxis);
+    this.sphere.add(this.jAxis);
+    this.sphere.add(this.kAxis);
+
+    this.interpolationPathLines = [];
 
     // GUI
     this.gui = new GUI();
@@ -196,6 +210,11 @@ class QuaternionWindow extends Window {
     this.nextQ = this.curQ.multiply(this.quaternions[this.cur].quaternion);
     delete this.interpolationPath;
     this.interpolationPath = [];
+    this.interpolationPathLines.forEach((val) => {
+      this.sphere.remove(val);
+    });
+    delete this.interpolationPathLines;
+    this.interpolationPathLines = [];
   }
   /**
    * Angle based quaternions need to be updated if values changed
@@ -227,9 +246,9 @@ class QuaternionWindow extends Window {
       delete this.rotationStart;
       this.scene.remove(this.rotationEnd);
       delete this.rotationEnd;
-      this.scene.remove(this.interpolationStart);
+      this.sphere.remove(this.interpolationStart);
       delete this.interpolationStart;
-      this.scene.remove(this.interpolationEnd);
+      this.sphere.remove(this.interpolationEnd);
       delete this.interpolationEnd;
     }
     let current = this.quaternions[this.cur].quaternion;
@@ -352,8 +371,8 @@ class QuaternionWindow extends Window {
     });
     this.interpolationEnd = new Mesh(endPGeometry, endPMaterial);
 
-    this.scene.add(this.interpolationStart);
-    this.scene.add(this.interpolationEnd);
+    this.sphere.add(this.interpolationStart);
+    this.sphere.add(this.interpolationEnd);
 
     this.scene.add(this.rotationStart);
     this.scene.add(this.rotationEnd);
@@ -408,23 +427,29 @@ class QuaternionWindow extends Window {
       );
 
       this.pointer.position.set(new_pos.x, new_pos.y, new_pos.z);
-      this.interpolationPath.push(new_pos.x, new_pos.y, new_pos.z);
+      this.interpolationPath.push(new Vector3(new_pos.x, new_pos.y, new_pos.z));
       if (this.interpolationPath.length > 1) {
-        if (this.interpolationPathLine != null) {
-          this.scene.remove(this.interpolationPathLine);
-          delete this.interpolationPathLine;
-        }
         this.interpolationPathGeometry = new LineGeometry();
-        this.interpolationPathGeometry.setPositions(this.interpolationPath);
+        let prev = this.interpolationPath[this.interpolationPath.length - 2];
+        let cur = this.interpolationPath[this.interpolationPath.length - 1];
+        this.interpolationPathGeometry.setPositions([
+          prev.x,
+          prev.y,
+          prev.z,
+          cur.x,
+          cur.y,
+          cur.z,
+        ]);
         let interpolationPathMaterial = new LineMaterial({
           linewidth: 0.0012,
           color: ROTATION_ARROW_COLOR,
         });
-        this.interpolationPathLine = new Line2(
+        let line = new Line2(
           this.interpolationPathGeometry,
           interpolationPathMaterial
         );
-        this.scene.add(this.interpolationPathLine);
+        this.interpolationPathLines.push(line);
+        this.sphere.add(line);
       }
     }
   }
