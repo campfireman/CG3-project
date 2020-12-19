@@ -131,6 +131,7 @@ class QuaternionWindow extends Window {
     });
     this.sphere = new Mesh(sgeometry, smaterial);
     this.scene.add(this.sphere);
+
     // GUI
     this.gui = new GUI();
 
@@ -166,8 +167,8 @@ class QuaternionWindow extends Window {
     this.rotationAxisArrow = null;
     this.rotationArrowLine = null;
     this.rotationArrowTip = null;
-    this.test = null;
-    this.test2 = null;
+    this.rotationStart = null;
+    this.rotationEnd = null;
     this.visualizeQuaternions();
     const pointerGeometry = new SphereGeometry(
       POINT_MARKER_RADIUS,
@@ -222,10 +223,10 @@ class QuaternionWindow extends Window {
       delete this.rotationArrowLine;
       this.scene.remove(this.rotationArrowTip);
       delete this.rotationArrowTip;
-      this.scene.remove(this.test);
-      delete this.test;
-      this.scene.remove(this.test2);
-      delete this.test2;
+      this.scene.remove(this.rotationStart);
+      delete this.rotationStart;
+      this.scene.remove(this.rotationEnd);
+      delete this.rotationEnd;
       this.scene.remove(this.startP);
       delete this.startP;
       this.scene.remove(this.endP);
@@ -265,13 +266,13 @@ class QuaternionWindow extends Window {
     let end = new Vector3().copy(start);
     end.applyMatrix4(endQ.matrix);
     end.normalize();
-    this.test = new ArrowHelper(
+    this.rotationStart = new ArrowHelper(
       new Vector3(0, 0, 0).copy(start),
       new Vector3(0, 0, 0),
       start.length(),
       0x00ff00
     );
-    this.test2 = new ArrowHelper(
+    this.rotationEnd = new ArrowHelper(
       new Vector3(0, 0, 0).copy(end),
       new Vector3(0, 0, 0),
       end.length(),
@@ -354,8 +355,8 @@ class QuaternionWindow extends Window {
     this.scene.add(this.startP);
     this.scene.add(this.endP);
 
-    this.scene.add(this.test);
-    this.scene.add(this.test2);
+    this.scene.add(this.rotationStart);
+    this.scene.add(this.rotationEnd);
     this.scene.add(this.rotationArrowLine);
     this.scene.add(this.rotationArrowTip);
     this.scene.add(this.rotationAxisArrow);
