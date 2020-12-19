@@ -1,10 +1,10 @@
-import * as THREE from "/three/three.module.js";
-import * as DAT from "/dat/dat.gui.module.js";
-
-import { OrbitControls } from "/jsm/controls/OrbitControls.js";
-
 import { Window } from "../window.js";
 import { Cloth } from "./Cloth.js";
+import * as DAT from "/dat/dat.gui.module.js";
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
+import * as THREE from "/three/three.module.js";
+
+
 
 /**
  * TODO
@@ -22,6 +22,11 @@ import { Cloth } from "./Cloth.js";
 
 const CLOTH_SIZE = 50;
 const CLOTH_TO_FLOOR_DISTANCE = 0.5;
+
+const LIGHT_COLOR = 0xff0000;
+const AMBIENT_LIGHT_INTENSITY = 0.2;
+const POINT_LIGHT_INTENSITY = 1;
+const POINT_LIGHT_DISTANCE = 100;
 
 class ClothWindow extends Window {
     constructor(renderer) {
@@ -84,9 +89,13 @@ class ClothWindow extends Window {
         this.scene = new THREE.Scene();
         this.scene.add(new THREE.GridHelper(50, 20));
 
-        const light = new THREE.PointLight( 0xff0000, 1, 100 );
-        light.position.set( 0, 10, 0 );
-        this.scene.add( light );
+        // lighting
+        this.pointLight = new THREE.PointLight(LIGHT_COLOR , POINT_LIGHT_INTENSITY, POINT_LIGHT_DISTANCE );
+        this.pointLight.position.set( 0, 10, 0 );
+        this.scene.add( this.pointLight );
+
+        this.ambientLight = new THREE.AmbientLight(LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY);
+        this.scene.add(this.ambientLight);
 
         this.camera = new THREE.PerspectiveCamera(
 			75,
