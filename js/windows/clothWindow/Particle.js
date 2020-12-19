@@ -2,7 +2,7 @@ import * as INTEGRATORS from "./Intergrators.js";
 import * as THREE from "/three/three.module.js";
 
 
-const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 32);
+const sphereGeometry = new THREE.SphereGeometry(0.04, 32, 32);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 const AIR_RESISTANCE = 10;
