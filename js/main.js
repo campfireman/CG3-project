@@ -20,7 +20,7 @@ var windowIndecies = {
 };
 
 var globalOptions = {
-  window: 0,
+  window: 1,
 };
 
 var lastTme = 0;

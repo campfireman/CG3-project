@@ -4,8 +4,11 @@ import {
   AmbientLight,
   ArrowHelper,
   GridHelper,
+  Mesh,
+  MeshPhongMaterial,
   PerspectiveCamera,
   Scene,
+  SphereGeometry,
   Vector3,
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
@@ -32,6 +35,13 @@ const DEFAULT_ANIMATION_TIME = 2000;
 const QUATERNION_RAND_INTERVAL = 2;
 const ROTATION_AXIS_COLOR = 0x66d9ef;
 const ROTATION_ARROW_COLOR = 0xff0000;
+const POINT_MARKER_RADIUS = 0.04;
+const POINT_SEGMENT_WIDTH = 12;
+const POINT_SEGMENT_HEIGHT = 12;
+
+const I_AXIS_COLOR = 0xffffff;
+const J_AXIS_COLOR = 0xffffff;
+const K_AXIS_COLOR = 0xffffff;
 
 class QuaternionWindow extends Window {
   constructor(renderer) {
@@ -111,6 +121,31 @@ class QuaternionWindow extends Window {
       }
     );
 
+    this.interpolationPath = [];
+
+    this.sphereRadius = 1;
+    this.sphereCenter = new Vector3(0, 0, 0);
+    this.projectionPoint = new Vector3(0, 0, 0);
+    const sgeometry = new SphereGeometry(this.sphereRadius, 32, 32);
+    const smaterial = new MeshPhongMaterial({
+      color: 0xffffff,
+      opacity: 0.5,
+      transparent: true,
+    });
+    this.sphere = new Mesh(sgeometry, smaterial);
+    this.scene.add(this.sphere);
+    this.sphere.translateX(2.5);
+
+    let origin = new Vector3(0, 0, 0);
+    this.iAxis = new ArrowHelper(new Vector3(1, 0, 0), origin, 2, I_AXIS_COLOR);
+    this.jAxis = new ArrowHelper(new Vector3(0, 1, 0), origin, 2, J_AXIS_COLOR);
+    this.kAxis = new ArrowHelper(new Vector3(0, 0, 1), origin, 2, K_AXIS_COLOR);
+    this.sphere.add(this.iAxis);
+    this.sphere.add(this.jAxis);
+    this.sphere.add(this.kAxis);
+
+    this.interpolationPathLines = [];
+
     // GUI
     this.gui = new GUI();
 
@@ -141,14 +176,26 @@ class QuaternionWindow extends Window {
     this.animationFolder.open();
 
     // animation
-    this.startQ = new QuaternionAngle(0, 0, 1, 0);
+    this.startQ = new QuaternionAngle(0, 0, 0, 0);
     this.resetAnimation();
     this.rotationAxisArrow = null;
     this.rotationArrowLine = null;
     this.rotationArrowTip = null;
-    this.test = null;
-    this.test2 = null;
+    this.rotationStart = null;
+    this.rotationEnd = null;
     this.visualizeQuaternions();
+    const pointerGeometry = new SphereGeometry(
+      POINT_MARKER_RADIUS,
+      POINT_SEGMENT_WIDTH,
+      POINT_SEGMENT_HEIGHT
+    );
+    pointerGeometry.translate(this.curQ.x, this.curQ.y, this.curQ.z);
+    const pointerMaterial = new MeshPhongMaterial({
+      color: 0xff0000,
+      opacity: 1,
+    });
+    this.pointer = new Mesh(pointerGeometry, pointerMaterial);
+    this.sphere.add(this.pointer);
   }
 
   /**
@@ -161,6 +208,13 @@ class QuaternionWindow extends Window {
     this.sumQ = 0;
     this.curQ = this.startQ;
     this.nextQ = this.curQ.multiply(this.quaternions[this.cur].quaternion);
+    delete this.interpolationPath;
+    this.interpolationPath = [];
+    this.interpolationPathLines.forEach((val) => {
+      this.sphere.remove(val);
+    });
+    delete this.interpolationPathLines;
+    this.interpolationPathLines = [];
   }
   /**
    * Angle based quaternions need to be updated if values changed
@@ -188,12 +242,14 @@ class QuaternionWindow extends Window {
       delete this.rotationArrowLine;
       this.scene.remove(this.rotationArrowTip);
       delete this.rotationArrowTip;
-      this.scene.remove(this.test);
-      delete this.test;
-      this.scene.remove(this.test2);
-      delete this.test2;
-      this.scene.remove(this.test3);
-      delete this.test3;
+      this.scene.remove(this.rotationStart);
+      delete this.rotationStart;
+      this.scene.remove(this.rotationEnd);
+      delete this.rotationEnd;
+      this.sphere.remove(this.interpolationStart);
+      delete this.interpolationStart;
+      this.sphere.remove(this.interpolationEnd);
+      delete this.interpolationEnd;
     }
     let current = this.quaternions[this.cur].quaternion;
     let origin = new Vector3(0, 0, 0);
@@ -229,13 +285,13 @@ class QuaternionWindow extends Window {
     let end = new Vector3().copy(start);
     end.applyMatrix4(endQ.matrix);
     end.normalize();
-    this.test = new ArrowHelper(
+    this.rotationStart = new ArrowHelper(
       new Vector3(0, 0, 0).copy(start),
       new Vector3(0, 0, 0),
       start.length(),
       0x00ff00
     );
-    this.test2 = new ArrowHelper(
+    this.rotationEnd = new ArrowHelper(
       new Vector3(0, 0, 0).copy(end),
       new Vector3(0, 0, 0),
       end.length(),
@@ -274,8 +330,52 @@ class QuaternionWindow extends Window {
       0.05
     );
 
-    this.scene.add(this.test);
-    this.scene.add(this.test2);
+    // visualize slerp and orientation
+    let new_pos = this.project(
+      this.projectionPoint,
+      new Vector3(this.curQ.x, this.curQ.y, this.curQ.z)
+        .sub(this.projectionPoint)
+        .normalize(),
+      this.sphereCenter,
+      this.sphereRadius
+    );
+    const startPGeometry = new SphereGeometry(
+      POINT_MARKER_RADIUS,
+      POINT_SEGMENT_WIDTH,
+      POINT_SEGMENT_HEIGHT
+    );
+    startPGeometry.translate(new_pos.x, new_pos.y, new_pos.z);
+    const startPMaterial = new MeshPhongMaterial({
+      color: 0x00ff00,
+      opacity: 1,
+    });
+    this.interpolationStart = new Mesh(startPGeometry, startPMaterial);
+
+    new_pos = this.project(
+      this.projectionPoint,
+      new Vector3(this.nextQ.x, this.nextQ.y, this.nextQ.z)
+        .sub(this.projectionPoint)
+        .normalize(),
+      this.sphereCenter,
+      this.sphereRadius
+    );
+    const endPGeometry = new SphereGeometry(
+      POINT_MARKER_RADIUS,
+      POINT_SEGMENT_WIDTH,
+      POINT_SEGMENT_HEIGHT
+    );
+    endPGeometry.translate(new_pos.x, new_pos.y, new_pos.z);
+    const endPMaterial = new MeshPhongMaterial({
+      color: 0x0000ff,
+      opacity: 1,
+    });
+    this.interpolationEnd = new Mesh(endPGeometry, endPMaterial);
+
+    this.sphere.add(this.interpolationStart);
+    this.sphere.add(this.interpolationEnd);
+
+    this.scene.add(this.rotationStart);
+    this.scene.add(this.rotationEnd);
     this.scene.add(this.rotationArrowLine);
     this.scene.add(this.rotationArrowTip);
     this.scene.add(this.rotationAxisArrow);
@@ -316,6 +416,41 @@ class QuaternionWindow extends Window {
         this.sumQ / (this.options.animationTime / this.quaternions.length);
       let pos = this.curQ.slerp(this.nextQ, t);
       this.object.setRotationFromMatrix(pos.matrix);
+
+      // update position in quaternion visualization
+      let new_pos = 0;
+      new_pos = this.project(
+        this.projectionPoint,
+        new Vector3(pos.x, pos.y, pos.z).sub(this.projectionPoint).normalize(),
+        this.sphereCenter,
+        this.sphereRadius
+      );
+
+      this.pointer.position.set(new_pos.x, new_pos.y, new_pos.z);
+      this.interpolationPath.push(new Vector3(new_pos.x, new_pos.y, new_pos.z));
+      if (this.interpolationPath.length > 1) {
+        this.interpolationPathGeometry = new LineGeometry();
+        let prev = this.interpolationPath[this.interpolationPath.length - 2];
+        let cur = this.interpolationPath[this.interpolationPath.length - 1];
+        this.interpolationPathGeometry.setPositions([
+          prev.x,
+          prev.y,
+          prev.z,
+          cur.x,
+          cur.y,
+          cur.z,
+        ]);
+        let interpolationPathMaterial = new LineMaterial({
+          linewidth: 0.0012,
+          color: ROTATION_ARROW_COLOR,
+        });
+        let line = new Line2(
+          this.interpolationPathGeometry,
+          interpolationPathMaterial
+        );
+        this.interpolationPathLines.push(line);
+        this.sphere.add(line);
+      }
     }
   }
   random() {
@@ -326,6 +461,18 @@ class QuaternionWindow extends Window {
   }
   count() {
     return this.quaternions.length;
+  }
+
+  project(O, D, C, radius) {
+    let L = new Vector3(0, 0, 0).copy(C).sub(O);
+    let t_ca = L.dot(D);
+    let d = Math.sqrt(L.dot(L) - Math.pow(t_ca, 2));
+    let t_hc = Math.sqrt(Math.pow(radius, 2) - Math.pow(d, 2));
+    let t_1 = t_ca + t_hc;
+    let new_pos = new Vector3(0, 0, 0)
+      .copy(O)
+      .add(new Vector3(0, 0, 0).copy(D).multiplyScalar(t_1));
+    return new_pos;
   }
   /**
    * Add quaternion to GUI and its representation to internal datastructure
