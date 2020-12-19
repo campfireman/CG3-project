@@ -34,7 +34,7 @@ class ClothWindow extends Window {
 
         this.guiOptions = {
             particle_distance:  0.1,
-            particle_mass: 1.0,
+            particle_mass: 3.0,
             toughness: 50,
 
             fix_left_corner: true,
