@@ -38,8 +38,7 @@ class Cloth {
         
         this.springs = [];
 
-        // basic springs only
-        // add shear and bend springs
+        // basic grid
         for(let y = 0; y < this.height; y++) {
             for(let x = 1; x < this.width; x++) {
                 let springH = new Spring(this.particles[x][y], this.particles[x-1][y], this.toughness, this.partDistance);
@@ -50,6 +49,34 @@ class Cloth {
             for(let y = 1; y < this.height; y++) {
                 let springV = new Spring(this.particles[x][y], this.particles[x][y-1], this.toughness, this.partDistance);
                 this.springs.push(springV);
+            }
+        }
+        // shear springs
+        for (let y = 0; y < this.height - 1; y++) {
+            for (let x=0; x < this.width - 1; x++) {
+                this.springs.push(
+                    new Spring(this.particles[x][y], this.particles[x+1][y+1], this.toughness, this.partDistance)
+                );
+                this.springs.push(
+                    new Spring(this.particles[x+1][y], this.particles[x][y+1], this.toughness, this.partDistance)
+                );
+            }
+        }
+        // bend springs
+        let length = 2;
+        for (let y=0; y < this.height - length; y++) {
+            let createYSpring = y % length == 0;
+            for (let x=0; x < this.width - length; x++) {
+                if (createYSpring) {
+                    this.springs.push(
+                        new Spring(this.particles[x][y], this.particles[x][y + length], this.toughness / length, this.partDistance * length)
+                    )
+                }
+                if (x % length == 0) {
+                    this.springs.push(
+                        new Spring(this.particles[x][y], this.particles[x + length][y], this.toughness / length, this.partDistance * length )
+                    )
+                }
             }
         }
 
