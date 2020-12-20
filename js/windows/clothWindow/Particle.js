@@ -1,21 +1,22 @@
-import * as INTEGRATORS from "./Intergrators.js";
 import * as THREE from "/three/three.module.js";
 
 
-const sphereGeometry = new THREE.SphereGeometry(0.04, 32, 32);
+const sphereGeometry = new THREE.SphereGeometry(0.05, 32, 32);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 const AIR_RESISTANCE = 10;
 
 class Particle {
 
-    constructor(scene, pos, mass) {
+    constructor(scene, pos, mass, integrator) {
         this.pos = pos;
         this.vel = new THREE.Vector3();
         this.acc = new THREE.Vector3();
 
         this.mass = mass;
         this.invMass = 1 / mass;
+
+        this.integrator = integrator
 
         this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         this.sphere.position.x = this.pos.x;
@@ -33,8 +34,8 @@ class Particle {
 
         this.applyForce(drag);
         
-        this.pos = INTEGRATORS.integrateEuler(this.pos, this.vel, dt);
-        this.vel = INTEGRATORS.integrateEuler(this.vel, this.acc, dt);
+        this.pos = this.integrator(this.pos, this.vel, dt);
+        this.vel = this.integrator(this.vel, this.acc, dt);
         
         this.acc.multiplyScalar(0);
 
@@ -61,6 +62,10 @@ class Particle {
     setInfiniteMass() {
         this.invMass = 0;
         this.mass = Infinity;   // <-- don't use it
+    }
+
+    setIntegrator(integrator) {
+        this.integrator = integrator;
     }
 
 }

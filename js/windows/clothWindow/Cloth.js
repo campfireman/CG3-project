@@ -1,9 +1,15 @@
-import * as THREE from "/three/three.module.js";
-
-import { TransformControls } from '/jsm/controls/TransformControls.js';
-
+import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
 import { Particle } from "./Particle.js";
 import { Spring } from "./Spring.js";
+import { TransformControls } from '/jsm/controls/TransformControls.js';
+import * as THREE from "/three/three.module.js";
+
+
+
+const INTEGRATORS = [
+    integrateEuler,
+    integrateRungeKutta
+]
 
 class Cloth {
 
@@ -18,11 +24,13 @@ class Cloth {
         this.particles = [];
         this.selectionGroup = [];
 
+        this.integrator = INTEGRATORS[options.integrator];
+
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
             for(let y = 0; y < height; y++) {
                 let partPos = pos.clone().add(new THREE.Vector3(x * partDistance, y * partDistance, y * partDistance / 2 /*Math.random() / 1000 - 0.001*/));
-                this.particles[x].push(new Particle(scene, partPos, partMass));
+                this.particles[x].push(new Particle(scene, partPos, partMass, this.integrator));
 
                 this.selectionGroup.push(this.particles[x].sphere);
             }
@@ -167,6 +175,15 @@ class Cloth {
     setToughness(newToughness) {
         for(let i = 0; i < this.springs.length; i++) {
             this.springs[i].setSpringConstant(newToughness);
+        }
+    }
+
+    setIntegrator(index) {
+        this.integrator = INTEGRATORS[index];
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                this.particles[x][y].setIntegrator(this.integrator);
+            }
         }
     }
 

@@ -34,13 +34,14 @@ class ClothWindow extends Window {
 
         this.guiOptions = {
             particle_distance:  0.1,
-            particle_mass: 3.0,
+            particle_mass: 1.0,
             toughness: 50,
 
             fix_left_corner: true,
             fix_right_corner: true,
 
-            gravity: 2
+            gravity: 2,
+            integrator: 0,
         }
 
         this.gui = new DAT.GUI();
@@ -86,6 +87,14 @@ class ClothWindow extends Window {
         envFolder.add(this.guiOptions, "gravity", 1, 100);
         envFolder.open();
         
+        let generalFolder = this.gui.addFolder("general");
+        generalFolder.add(this.guiOptions, "integrator", {
+            euler: 0,
+            runge_kutta: 1,
+        }).onChange((newIntegratorIndex) => {
+            this.cloth.setIntegrator(newIntegratorIndex);
+        })
+        generalFolder.open();
         this.scene = new THREE.Scene();
         this.scene.add(new THREE.GridHelper(50, 20));
 
@@ -147,4 +156,5 @@ class ClothWindow extends Window {
 
 }
 
-export { ClothWindow };
+    export { ClothWindow };
+
