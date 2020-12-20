@@ -26,16 +26,22 @@ class Particle {
         scene.add(this.sphere);
     }
 
-    update(dt) {
+    update(dt, num_h) {
         let velMag = this.vel.length();
         let dragMag = velMag * velMag * AIR_RESISTANCE;
 
         let drag = this.vel.clone().normalize().multiplyScalar(-dragMag);
 
         this.applyForce(drag);
-        
-        this.pos = this.integrator(this.pos, this.vel, dt);
-        this.vel = this.integrator(this.vel, this.acc, dt);
+        let new_pos = null;
+        let new_vel = null;
+        let h = dt / num_h;
+        for (let i = 0; i < num_h; i++) {
+            new_pos = this.integrator(this.pos, this.vel, h);
+            new_vel = this.integrator(this.vel, this.acc, h);
+        }
+        this.pos = new_pos
+        this.vel = new_vel
         
         this.acc.multiplyScalar(0);
 

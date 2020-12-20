@@ -110,15 +110,14 @@ class Cloth {
         this.updateControls();
 
         dt = dt / 1000;
-        for(let i = 0; i < 5; i++) {
-            for(let i = 0; i < this.springs.length; i++) {
-                this.springs[i].update(dt / 1000);
-            }
-            // update the particles at last after all forces had been applied
-            for(let x = 0; x < this.width; x++) {
-                for(let y = 0; y < this.height; y++) {
-                    this.particles[x][y].update(dt / 5);
-                }
+        let num_h = 7;
+        for(let i = 0; i < this.springs.length; i++) {
+            this.springs[i].update(dt / num_h);
+        }
+        // update the particles at last after all forces had been applied
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                this.particles[x][y].update(dt, num_h);
             }
         }
     }
