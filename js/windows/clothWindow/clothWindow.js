@@ -20,7 +20,7 @@ import * as THREE from "/three/three.module.js";
  *  wind
  */
 
-const CLOTH_SIZE = 50;
+const CLOTH_SIZE = 20;
 const CLOTH_TO_FLOOR_DISTANCE = 0.5;
 
 const LIGHT_COLOR = 0xff0000;

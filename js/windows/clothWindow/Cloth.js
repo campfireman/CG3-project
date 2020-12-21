@@ -17,6 +17,7 @@ class Cloth {
         this.options = options;
         this.width = width;
         this.height = height;
+        this.scene = scene
 
         this.partDistance = partDistance;
         this.toughness = toughness;
@@ -41,13 +42,13 @@ class Cloth {
         // basic grid
         for(let y = 0; y < this.height; y++) {
             for(let x = 1; x < this.width; x++) {
-                let springH = new Spring(this.particles[x][y], this.particles[x-1][y], this.toughness, this.partDistance);
+                let springH = new Spring(this.particles[x][y], this.particles[x-1][y], this.toughness, this.partDistance, this.scene);
                 this.springs.push(springH);
             }
         }
         for(let x = 0; x < this.width; x++) {
             for(let y = 1; y < this.height; y++) {
-                let springV = new Spring(this.particles[x][y], this.particles[x][y-1], this.toughness, this.partDistance);
+                let springV = new Spring(this.particles[x][y], this.particles[x][y-1], this.toughness, this.partDistance, this.scene);
                 this.springs.push(springV);
             }
         }
@@ -55,10 +56,10 @@ class Cloth {
         for (let y = 0; y < this.height - 1; y++) {
             for (let x=0; x < this.width - 1; x++) {
                 this.springs.push(
-                    new Spring(this.particles[x][y], this.particles[x+1][y+1], this.toughness, this.partDistance)
+                    new Spring(this.particles[x][y], this.particles[x+1][y+1], this.toughness, this.partDistance, this.scene)
                 );
                 this.springs.push(
-                    new Spring(this.particles[x+1][y], this.particles[x][y+1], this.toughness, this.partDistance)
+                    new Spring(this.particles[x+1][y], this.particles[x][y+1], this.toughness, this.partDistance, this.scene)
                 );
             }
         }
@@ -69,12 +70,12 @@ class Cloth {
             for (let x=0; x < this.width - length; x++) {
                 if (createYSpring) {
                     this.springs.push(
-                        new Spring(this.particles[x][y], this.particles[x][y + length], this.toughness / length, this.partDistance * length)
+                        new Spring(this.particles[x][y], this.particles[x][y + length], this.toughness / length, this.partDistance * length, this.scene)
                     )
                 }
                 if (x % length == 0) {
                     this.springs.push(
-                        new Spring(this.particles[x][y], this.particles[x + length][y], this.toughness / length, this.partDistance * length )
+                        new Spring(this.particles[x][y], this.particles[x + length][y], this.toughness / length, this.partDistance * length , this.scene)
                     )
                 }
             }
@@ -146,6 +147,9 @@ class Cloth {
             for(let y = 0; y < this.height; y++) {
                 this.particles[x][y].update(dt, num_h);
             }
+        }
+        for(let i = 0; i < this.springs.length; i++) {
+            this.springs[i].updateVisulization();
         }
     }
 
