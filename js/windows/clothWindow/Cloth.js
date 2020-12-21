@@ -138,16 +138,25 @@ class Cloth {
         this.updateControls();
 
         dt = dt / 1000;
-        let num_h = 7;
-        for(let i = 0; i < this.springs.length; i++) {
-            this.springs[i].update(dt / num_h);
-        }
-        // update the particles at last after all forces had been applied
-        for(let x = 0; x < this.width; x++) {
-            for(let y = 0; y < this.height; y++) {
-                this.particles[x][y].update(dt, num_h);
+        let numH = 50;
+
+        for(let miniStep = 0; miniStep < numH; miniStep++) {
+
+            this.applyForceUniform(new THREE.Vector3(0, -this.options.gravity, 0));
+
+            for(let i = 0; i < this.springs.length; i++) {
+                this.springs[i].update(dt / numH);
             }
+            // update the particles at last after all forces had been applied
+            for(let x = 0; x < this.width; x++) {
+                for(let y = 0; y < this.height; y++) {
+                    this.particles[x][y].update(dt / numH, numH);
+                }
+            }
+
         }
+
+
         for(let i = 0; i < this.springs.length; i++) {
             this.springs[i].updateVisulization();
         }

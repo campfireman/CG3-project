@@ -11,7 +11,9 @@ function integrateRungeKutta(xOrg, dxOrg, h) {
     // work in progress
     let x = xOrg.clone();
     let dx = dxOrg.clone();
+    
     let h_2 = h/2;
+
     let k_1 = x
     let k_2 = x.clone().add(k_1.clone().multiplyScalar(h_2))
     let k_3 = x.clone().add(k_2.clone().multiplyScalar(h_2))

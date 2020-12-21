@@ -34,8 +34,8 @@ class ClothWindow extends Window {
 
         this.guiOptions = {
             particle_distance:  0.1,
-            particle_mass: 5.0,
-            toughness: 40,
+            particle_mass: 1.0,
+            toughness: 200,
 
             fix_left_corner: true,
             fix_right_corner: true,
@@ -127,8 +127,6 @@ class ClothWindow extends Window {
 
     update(time) {
         this.renderer.clearDepth();
-
-        this.cloth.applyForceUniform(new THREE.Vector3(0, -this.guiOptions.gravity, 0));
 
         this.cloth.update(time);
         
