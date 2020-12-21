@@ -1,9 +1,15 @@
-import * as THREE from "/three/three.module.js";
-
-import { TransformControls } from '/jsm/controls/TransformControls.js';
-
+import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
 import { Particle } from "./Particle.js";
 import { Spring } from "./Spring.js";
+import { TransformControls } from '/jsm/controls/TransformControls.js';
+import * as THREE from "/three/three.module.js";
+
+
+
+const INTEGRATORS = [
+    integrateEuler,
+    integrateRungeKutta
+]
 
 class Cloth {
 
@@ -11,6 +17,7 @@ class Cloth {
         this.options = options;
         this.width = width;
         this.height = height;
+        this.scene = scene
 
         this.partDistance = partDistance;
         this.toughness = toughness;
@@ -18,11 +25,13 @@ class Cloth {
         this.particles = [];
         this.selectionGroup = [];
 
+        this.integrator = INTEGRATORS[options.integrator];
+
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
             for(let y = 0; y < height; y++) {
                 let partPos = pos.clone().add(new THREE.Vector3(x * partDistance, y * partDistance, y * partDistance / 2 /*Math.random() / 1000 - 0.001*/));
-                this.particles[x].push(new Particle(scene, partPos, partMass));
+                this.particles[x].push(new Particle(scene, partPos, partMass, this.integrator));
 
                 this.selectionGroup.push(this.particles[x].sphere);
             }
@@ -30,18 +39,45 @@ class Cloth {
         
         this.springs = [];
 
-        // basic springs only
-        // add shear and bend springs
+        // basic grid
         for(let y = 0; y < this.height; y++) {
             for(let x = 1; x < this.width; x++) {
-                let springH = new Spring(this.particles[x][y], this.particles[x-1][y], this.toughness, this.partDistance);
+                let springH = new Spring(this.particles[x][y], this.particles[x-1][y], this.toughness, this.partDistance, this.scene);
                 this.springs.push(springH);
             }
         }
         for(let x = 0; x < this.width; x++) {
             for(let y = 1; y < this.height; y++) {
-                let springV = new Spring(this.particles[x][y], this.particles[x][y-1], this.toughness, this.partDistance);
+                let springV = new Spring(this.particles[x][y], this.particles[x][y-1], this.toughness, this.partDistance, this.scene);
                 this.springs.push(springV);
+            }
+        }
+        // shear springs
+        for (let y = 0; y < this.height - 1; y++) {
+            for (let x=0; x < this.width - 1; x++) {
+                this.springs.push(
+                    new Spring(this.particles[x][y], this.particles[x+1][y+1], this.toughness, this.partDistance, this.scene)
+                );
+                this.springs.push(
+                    new Spring(this.particles[x+1][y], this.particles[x][y+1], this.toughness, this.partDistance, this.scene)
+                );
+            }
+        }
+        // bend springs
+        let length = 2;
+        for (let y=0; y < this.height - length; y++) {
+            let createYSpring = y % length == 0;
+            for (let x=0; x < this.width - length; x++) {
+                if (createYSpring) {
+                    this.springs.push(
+                        new Spring(this.particles[x][y], this.particles[x][y + length], this.toughness / length, this.partDistance * length, this.scene)
+                    )
+                }
+                if (x % length == 0) {
+                    this.springs.push(
+                        new Spring(this.particles[x][y], this.particles[x + length][y], this.toughness / length, this.partDistance * length , this.scene)
+                    )
+                }
             }
         }
 
@@ -102,16 +138,27 @@ class Cloth {
         this.updateControls();
 
         dt = dt / 1000;
-        for(let i = 0; i < 5; i++) {
+        let numH = 50;
+
+        for(let miniStep = 0; miniStep < numH; miniStep++) {
+
+            this.applyForceUniform(new THREE.Vector3(0, -this.options.gravity, 0));
+
             for(let i = 0; i < this.springs.length; i++) {
-                this.springs[i].update(dt / 1000);
+                this.springs[i].update(dt / numH);
             }
             // update the particles at last after all forces had been applied
             for(let x = 0; x < this.width; x++) {
                 for(let y = 0; y < this.height; y++) {
-                    this.particles[x][y].update(dt / 5);
+                    this.particles[x][y].update(dt / numH, numH);
                 }
             }
+
+        }
+
+
+        for(let i = 0; i < this.springs.length; i++) {
+            this.springs[i].updateVisulization();
         }
     }
 
@@ -167,6 +214,15 @@ class Cloth {
     setToughness(newToughness) {
         for(let i = 0; i < this.springs.length; i++) {
             this.springs[i].setSpringConstant(newToughness);
+        }
+    }
+
+    setIntegrator(index) {
+        this.integrator = INTEGRATORS[index];
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                this.particles[x][y].setIntegrator(this.integrator);
+            }
         }
     }
 

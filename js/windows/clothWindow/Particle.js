@@ -1,21 +1,22 @@
 import * as THREE from "/three/three.module.js";
 
-import * as INTEGRATORS from "./Intergrators.js";
 
-const sphereGeometry = new THREE.SphereGeometry(0.1, 32, 32);
-const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0xcf1120 });
+const sphereGeometry = new THREE.SphereGeometry(0.03, 32, 32);
+const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 const AIR_RESISTANCE = 10;
 
 class Particle {
 
-    constructor(scene, pos, mass) {
+    constructor(scene, pos, mass, integrator) {
         this.pos = pos;
         this.vel = new THREE.Vector3();
         this.acc = new THREE.Vector3();
 
         this.mass = mass;
         this.invMass = 1 / mass;
+
+        this.integrator = integrator
 
         this.sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
         this.sphere.position.x = this.pos.x;
@@ -25,16 +26,22 @@ class Particle {
         scene.add(this.sphere);
     }
 
-    update(dt) {
+    update(dt, num_h) {
+
         let velMag = this.vel.length();
         let dragMag = velMag * velMag * AIR_RESISTANCE;
-
         let drag = this.vel.clone().normalize().multiplyScalar(-dragMag);
-
         this.applyForce(drag);
-        
-        this.pos = INTEGRATORS.integrateEuler(this.pos, this.vel, dt);
-        this.vel = INTEGRATORS.integrateEuler(this.vel, this.acc, dt);
+
+        let new_pos = null;
+        let new_vel = null;
+        //let h = dt / num_h;
+        //for (let i = 0; i < num_h; i++) {
+        new_pos = this.integrator(this.pos, this.vel, dt);
+        new_vel = this.integrator(this.vel, this.acc, dt);
+        //}
+        this.pos = new_pos
+        this.vel = new_vel
         
         this.acc.multiplyScalar(0);
 
@@ -61,6 +68,10 @@ class Particle {
     setInfiniteMass() {
         this.invMass = 0;
         this.mass = Infinity;   // <-- don't use it
+    }
+
+    setIntegrator(integrator) {
+        this.integrator = integrator;
     }
 
 }

@@ -1,27 +1,32 @@
-import * as THREE from "/three/three.module.js";
-import * as DAT from "/dat/dat.gui.module.js";
-
-import { OrbitControls } from "/jsm/controls/OrbitControls.js";
-
 import { Window } from "../window.js";
 import { Cloth } from "./Cloth.js";
+import * as DAT from "/dat/dat.gui.module.js";
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
+import * as THREE from "/three/three.module.js";
+
+
 
 /**
  * TODO
- *  licht                       Ture
+ *  licht                       Ture done
  *  gui                         Albert done
  *  controls (tuch anheben)     Albert done
  *  fixed points (gui)          Albert done
  *  triangle mesh (coloring)    
- *  shear bend springs          Ture
- *  more intergrtors            Ture
+ *  shear bend springs          Ture done
+ *  integrating                 Ture, Albert
  *  adaptive steps
- *  spring visualizing
+ *  spring visualizing          Ture done
  *  wind
  */
 
-const CLOTH_SIZE = 50;
+const CLOTH_SIZE = 20;
 const CLOTH_TO_FLOOR_DISTANCE = 0.5;
+
+const LIGHT_COLOR = 0xff0000;
+const AMBIENT_LIGHT_INTENSITY = 0.2;
+const POINT_LIGHT_INTENSITY = 1;
+const POINT_LIGHT_DISTANCE = 100;
 
 class ClothWindow extends Window {
     constructor(renderer) {
@@ -30,12 +35,13 @@ class ClothWindow extends Window {
         this.guiOptions = {
             particle_distance:  0.1,
             particle_mass: 1.0,
-            toughness: 50,
+            toughness: 200,
 
             fix_left_corner: true,
             fix_right_corner: true,
 
-            gravity: 2
+            gravity: 2,
+            integrator: 0,
         }
 
         this.gui = new DAT.GUI();
@@ -81,12 +87,24 @@ class ClothWindow extends Window {
         envFolder.add(this.guiOptions, "gravity", 1, 100);
         envFolder.open();
         
+        let generalFolder = this.gui.addFolder("general");
+        generalFolder.add(this.guiOptions, "integrator", {
+            euler: 0,
+            runge_kutta: 1,
+        }).onChange((newIntegratorIndex) => {
+            this.cloth.setIntegrator(newIntegratorIndex);
+        })
+        generalFolder.open();
         this.scene = new THREE.Scene();
         this.scene.add(new THREE.GridHelper(50, 20));
 
-        const light = new THREE.PointLight( 0xff0000, 1, 100 );
-        light.position.set( 0, 10, 0 );
-        this.scene.add( light );
+        // lighting
+        this.pointLight = new THREE.PointLight(LIGHT_COLOR , POINT_LIGHT_INTENSITY, POINT_LIGHT_DISTANCE );
+        this.pointLight.position.set( 0, 10, 0 );
+        this.scene.add( this.pointLight );
+
+        this.ambientLight = new THREE.AmbientLight(LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY);
+        this.scene.add(this.ambientLight);
 
         this.camera = new THREE.PerspectiveCamera(
 			75,
@@ -109,8 +127,6 @@ class ClothWindow extends Window {
 
     update(time) {
         this.renderer.clearDepth();
-
-        this.cloth.applyForceUniform(new THREE.Vector3(0, -this.guiOptions.gravity, 0));
 
         this.cloth.update(time);
         
@@ -138,4 +154,5 @@ class ClothWindow extends Window {
 
 }
 
-export { ClothWindow };
+    export { ClothWindow };
+
