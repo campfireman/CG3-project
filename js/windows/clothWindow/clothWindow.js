@@ -8,15 +8,15 @@ import * as THREE from "/three/three.module.js";
 
 /**
  * TODO
- *  licht                       Ture
+ *  licht                       Ture done
  *  gui                         Albert done
  *  controls (tuch anheben)     Albert done
  *  fixed points (gui)          Albert done
  *  triangle mesh (coloring)    
- *  shear bend springs          Ture
- *  more intergrtors            Ture
+ *  shear bend springs          Ture done
+ *  integrating                 Ture, Albert
  *  adaptive steps
- *  spring visualizing
+ *  spring visualizing          Ture done
  *  wind
  */
 
