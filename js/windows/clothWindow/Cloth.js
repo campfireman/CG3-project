@@ -4,8 +4,6 @@ import { Spring } from "./Spring.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
 
-
-
 const INTEGRATORS = [
     integrateEuler,
     integrateRungeKutta
