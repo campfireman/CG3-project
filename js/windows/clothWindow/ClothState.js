@@ -1,5 +1,7 @@
 import * as THREE from "/three/three.module.js";
 
+import { ClothDeriv } from "./ClothDeriv.js";
+
 const AIR_RESISTANCE = 10;
 
 class ClothState {
@@ -23,9 +25,13 @@ class ClothState {
     }
 
     add(clothDeriv) {
-        for(let x = 0; x < width; x++) {
-            for(let y = 0; y < height; y++) {
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
                 this.positions[x][y].add(clothDeriv.dPos[x][y]);
+                if(this.positions[x][y].y < 0) {
+                    this.positions[x][y].y = 0;
+                    this.velocities[x][y].y = 0;
+                }
                 this.velocities[x][y].add(clothDeriv.dVel[x][y]);
             }
         }
@@ -33,17 +39,17 @@ class ClothState {
         return this;
     }
 
-    getDerivAt(dt) {
-        let deriv = new clothDeriv(this.width, this.height);
+    getDeriv() {
+        let deriv = new ClothDeriv(this.width, this.height);
 
-        for(let x = 0; x < width; x++) {
-            for(let y = 0; y < height; y++) {
-                deriv[x][y].dPos = this.velocities[x][y].clone();
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                deriv.dPos[x][y] = this.velocities[x][y].clone();
 
                 let force = new THREE.Vector3();
 
                 // Gravity
-                force.y += 0.1;
+                force.y += -this.options.gravity;
 
                 // Air resistance
                 let velMag = this.velocities[x][y].length();
@@ -61,13 +67,17 @@ class ClothState {
                 if(y > 0)
                     force.add(this.calcSpringForce(this.positions[x][y], this.positions[x][y-1]));
 
-                deriv[x][y].dVel = 0;
+                
+                force.multiplyScalar(1 / this.options.particle_mass);
+                deriv.dVel[x][y] = force;
             }
         }
+
+        return deriv;
     }
 
     calcSpringForce(pos1, pos2) {
-        let direction =  pos1.clone().sub(pos2);
+        let direction =  pos2.clone().sub(pos1);
         let displacement = direction.length() - this.options.particle_distance;
         let force = direction.setLength(this.options.toughness * displacement);
         

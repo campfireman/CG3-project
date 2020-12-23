@@ -1,3 +1,4 @@
+import { ClothState } from "./ClothState.js";
 import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
 import { Particle } from "./Particle.js";
 import { Spring } from "./Spring.js";
@@ -25,17 +26,20 @@ class Cloth {
 
         this.integrator = INTEGRATORS[options.integrator];
 
+        this.clothState = new ClothState(width, height, options);
+
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
             for(let y = 0; y < height; y++) {
                 let partPos = pos.clone().add(new THREE.Vector3(x * partDistance, y * partDistance, y * partDistance / 2 /*Math.random() / 1000 - 0.001*/));
                 this.particles[x].push(new Particle(scene, partPos, partMass, this.integrator));
+                this.clothState.positions[x][y] = partPos.clone();
 
                 this.selectionGroup.push(this.particles[x].sphere);
             }
         }
         
-        this.springs = [];
+        /*this.springs = [];
 
         // basic grid
         for(let y = 0; y < this.height; y++) {
@@ -77,7 +81,7 @@ class Cloth {
                     )
                 }
             }
-        }
+        }*/
 
         this.initControls(scene, camera, renderer, orbitControl);
 
@@ -138,7 +142,7 @@ class Cloth {
         dt = dt / 1000;
         let numH = 50;
 
-        for(let miniStep = 0; miniStep < numH; miniStep++) {
+        /*for(let miniStep = 0; miniStep < numH; miniStep++) {
 
             this.applyForceUniform(new THREE.Vector3(0, -this.options.gravity, 0));
 
@@ -157,7 +161,22 @@ class Cloth {
 
         for(let i = 0; i < this.springs.length; i++) {
             this.springs[i].updateVisulization();
+        }*/
+
+        for(let miniStep = 0; miniStep < numH; miniStep++) {
+            let deriv = this.clothState.getDeriv();
+            deriv.mul(dt / numH);
+            this.clothState.add(deriv);
         }
+
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                this.particles[x][y].pos = this.clothState.positions[x][y];
+                this.particles[x][y].update(dt / numH, numH);
+            }
+        }
+
+
     }
 
     updateControls() {

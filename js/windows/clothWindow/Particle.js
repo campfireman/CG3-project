@@ -28,7 +28,7 @@ class Particle {
 
     update(dt, num_h) {
 
-        let velMag = this.vel.length();
+        /*let velMag = this.vel.length();
         let dragMag = velMag * velMag * AIR_RESISTANCE;
         let drag = this.vel.clone().normalize().multiplyScalar(-dragMag);
         this.applyForce(drag);
@@ -48,7 +48,7 @@ class Particle {
         if(this.pos.y < 0) {
             this.pos.y = 0;
             this.vel.y = 0;
-        }
+        }*/
 
         this.sphere.position.x = this.pos.x;
         this.sphere.position.y = this.pos.y;

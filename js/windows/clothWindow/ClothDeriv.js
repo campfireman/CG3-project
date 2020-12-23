@@ -3,6 +3,9 @@ import * as THREE from "/three/three.module.js";
 class ClothDeriv {
 
     constructor(width, height) {
+        this.width = width;
+        this.height = height;
+
         this.dPos = [];
         this.dVel = [];
 
@@ -17,10 +20,10 @@ class ClothDeriv {
     }
 
     mul(factor) {
-        for(let x = 0; x < width; x++) {
-            for(let y = 0; y < height; y++) {
-                this.positions[x][y].multiplyScalar(factor);
-                this.velocities[x][y].multiplyScalar(factor);
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                this.dPos[x][y].multiplyScalar(factor);
+                this.dVel[x][y].multiplyScalar(factor);
             }
         }
 
