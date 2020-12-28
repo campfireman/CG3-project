@@ -4,6 +4,8 @@ import { ClothDeriv } from "./ClothDeriv.js";
 
 const AIR_RESISTANCE = 10;
 
+var isInfiniteMass = [];
+
 class ClothState {
 
     constructor(width, height, options) {
@@ -39,12 +41,12 @@ class ClothState {
         return this;
     }
 
-    getDeriv() {
+    getDeriv(h) {
         let deriv = new ClothDeriv(this.width, this.height);
 
         for(let x = 0; x < this.width; x++) {
             for(let y = 0; y < this.height; y++) {
-                deriv.dPos[x][y] = this.velocities[x][y].clone();
+                deriv.dPos[x][y] = this.velocities[x][y].clone().multiplyScalar(h);
 
                 let force = new THREE.Vector3();
 
@@ -67,13 +69,30 @@ class ClothState {
                 if(y > 0)
                     force.add(this.calcSpringForce(this.positions[x][y], this.positions[x][y-1]));
 
+                if(isInfiniteMass[x][y]) {
+                    force.multiplyScalar(0);
+                } else {
+                    force.multiplyScalar(1 / this.options.particle_mass);
+                }
                 
-                force.multiplyScalar(1 / this.options.particle_mass);
-                deriv.dVel[x][y] = force;
+                deriv.dVel[x][y] = force.multiplyScalar(h);
             }
         }
 
-        return deriv;
+        return deriv
+    }
+
+    clone() {
+        let ret = new ClothState(this.width, this.height, this.options);
+
+        for(let x = 0; x < this.width; x++) {
+            for(let y = 0; y < this.height; y++) {
+                ret.positions[x][y] = this.positions[x][y].clone();
+                ret.velocities[x][y] = this.velocities[x][y].clone();
+            }
+        }
+
+        return ret;
     }
 
     calcSpringForce(pos1, pos2) {
@@ -86,4 +105,17 @@ class ClothState {
 
 };
 
-export { ClothState };
+function initMassArray(width, height) {
+    for(let x = 0; x < width; x++) {
+        isInfiniteMass.push([]);
+        for(let y = 0; y < height; y++) {
+            isInfiniteMass[x].push(false);
+        }
+    }
+}
+
+function setInfiniteMass(x, y, isInfinite) {
+    isInfiniteMass[x][y] = isInfinite;
+}
+
+export { ClothState, initMassArray, setInfiniteMass };
