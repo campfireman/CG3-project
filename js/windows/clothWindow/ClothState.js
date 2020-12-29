@@ -79,7 +79,7 @@ class ClothState {
             }
         }
 
-        return deriv
+        return deriv;
     }
 
     clone() {

@@ -12,12 +12,14 @@ import * as THREE from "/three/three.module.js";
  *  gui                         Albert done
  *  controls (tuch anheben)     Albert done
  *  fixed points (gui)          Albert done
- *  triangle mesh (coloring)    
- *  shear bend springs          Ture done
- *  integrating                 Ture, Albert
- *  adaptive steps
- *  spring visualizing          Ture done
- *  wind
+ *  triangle mesh (coloring)    Albert
+ *  shear bend springs          Ture
+ *  integrating                 Ture, Albert done
+ *  intergrator switching       Ture
+ *  airresistance gui           Albert
+ *  adaptive steps              Albert
+ *  spring visualizing          Ture
+ *  wind + gui                  Ture
  */
 
 const CLOTH_SIZE = 20;
@@ -47,21 +49,9 @@ class ClothWindow extends Window {
         this.gui = new DAT.GUI();
 
         let clothFolder = this.gui.addFolder("cloth");
-        clothFolder.add(this.guiOptions, "particle_distance", 0.001, 1.0)
-        .step(0.001)
-        .onChange((newDistance) => {
-            //this.cloth.setParticleDistance(newDistance);
-        });
-        clothFolder.add(this.guiOptions, "particle_mass", 0.1, 10)
-        .step(0.001)
-        .onChange((newMass) => {
-            //this.cloth.setAllParticleMass(newMass);
-        });
-        clothFolder.add(this.guiOptions, "toughness", 1, 1000)
-        .step(0.001)
-        .onChange((newToughness) => {
-            //this.cloth.setToughness(newToughness);
-        });
+        clothFolder.add(this.guiOptions, "particle_distance", 0.001, 1.0).step(0.001);
+        clothFolder.add(this.guiOptions, "particle_mass", 0.1, 10).step(0.001);
+        clothFolder.add(this.guiOptions, "toughness", 1, 20000).step(0.001);
 
         clothFolder.add(this.guiOptions, "fix_left_corner")
         .onChange((leftCornerFixed) => {
@@ -69,7 +59,6 @@ class ClothWindow extends Window {
                 this.cloth.setParticlePos(0, CLOTH_SIZE-1, this.getLeftCornerPos());
                 this.cloth.setAnchorParticle(0, CLOTH_SIZE-1);
             } else {
-                //this.cloth.setParticleMass(0, CLOTH_SIZE-1, this.guiOptions.particle_mass);
                 this.cloth.unsetAnchorParticle(0, CLOTH_SIZE-1);
             }
         });
@@ -79,7 +68,6 @@ class ClothWindow extends Window {
                 this.cloth.setParticlePos(CLOTH_SIZE-1, CLOTH_SIZE-1, this.getRightCornerPos());
                 this.cloth.setAnchorParticle(CLOTH_SIZE-1, CLOTH_SIZE-1);
             } else {
-                //this.cloth.setParticleMass(CLOTH_SIZE-1, CLOTH_SIZE-1, this.guiOptions.particle_mass);
                 this.cloth.unsetAnchorParticle(CLOTH_SIZE-1, CLOTH_SIZE-1);
             }
         });
