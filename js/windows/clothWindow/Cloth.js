@@ -1,7 +1,6 @@
-import { ClothState, initMassArray, setInfiniteMass } from "./ClothState.js";
+import { ClothState, distance, initMassArray, setInfiniteMass } from "./ClothState.js";
 import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
 import * as INTEGRATORS from "./Intergrators.js";
-import { Particle } from "./Particle.js";
 import { Spring } from "./Spring.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
@@ -11,13 +10,14 @@ import * as THREE from "/three/three.module.js";
     integrateRungeKutta
 ];*/
 
-const sphereGeometry = new THREE.SphereGeometry(0.03, 32, 32);
+const sphereGeometry = new THREE.SphereGeometry(0.05, 32, 32);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 class Cloth {
 
-    constructor(scene, camera, renderer, orbitControl, options, width, height, pos, partDistance, partMass, toughness) {
+    constructor(scene, camera, renderer, orbitControl, options, generalGui, width, height, pos, partDistance, partMass, toughness) {
         this.options = options;
+        this.generalGui = generalGui;
         this.width = width;
         this.height = height;
         this.scene = scene
@@ -28,9 +28,9 @@ class Cloth {
         this.particles = [];
         this.selectionGroup = [];
 
-        this.integrator = INTEGRATORS[options.integrator];
-
         this.clothState = new ClothState(width, height, options);
+
+        this.integrator = INTEGRATORS[options.integrator];
 
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
@@ -55,6 +55,57 @@ class Cloth {
         initMassArray(width, height);
 
         this.initControls(scene, camera, renderer, orbitControl);
+
+
+        this.meshVertecies = [];
+        this.meshIndecies = [];
+        this.meshColors = [];
+        for(let i = 0; i < width * height * 3; i++) {
+            this.meshVertecies.push(0);
+            this.meshColors.push(0);
+        }
+        for(let i = 0; i < (width - 1) * (height - 1) * 2; i++) {
+            this.meshIndecies.push(0, 0, 0);
+        }
+
+        for(let y = 0; y < this.height - 1; y++) {
+            for(let x = 0; x < this.width - 1; x++) {
+                let a = (y * this.width + x);
+                let b = ((y + 1) * this.width + x);
+                let c = ((y + 1) * this.width + x + 1);
+                let d = (y * this.width + x + 1);
+
+                let faceStartIndex = 6 * (y * (this.width - 1) + x);
+
+                this.meshIndecies[faceStartIndex + 0] = a;
+                this.meshIndecies[faceStartIndex + 1] = b;
+                this.meshIndecies[faceStartIndex + 2] = c;
+
+                this.meshIndecies[faceStartIndex + 3] = a;
+                this.meshIndecies[faceStartIndex + 4] = c;
+                this.meshIndecies[faceStartIndex + 5] = d;
+            }
+        }
+
+        this.meshGeometry = new THREE.BufferGeometry();
+        this.meshGeometry.setIndex(this.meshIndecies);
+
+        this.vertexBuffer = new THREE.Float32BufferAttribute(this.meshVertecies, 3);
+        this.vertexBuffer.needsUpdate = true;
+        this.meshGeometry.setAttribute("position", this.vertexBuffer);
+        this.meshGeometry.computeVertexNormals();
+        let colorsBuffer = new THREE.Float32BufferAttribute(this.meshColors, 3, true);
+        this.meshGeometry.setAttribute("color", colorsBuffer);
+
+        this.meshMaterial = new THREE.MeshPhongMaterial({
+            side: THREE.DoubleSide,
+            vertexColors: true
+        });
+
+        this.mesh = new THREE.Mesh(this.meshGeometry, this.meshMaterial);
+        this.mesh.geometry.attributes.position.needsUpdate = true;
+        this.mesh.geometry.attributes.color.needsUpdate = true;
+        scene.add(this.mesh);
 
     }
 
@@ -81,7 +132,7 @@ class Cloth {
 			let raycaster = new THREE.Raycaster();
 
 			raycaster.setFromCamera(mouseVector, camera);
-            let intersects = raycaster.intersectObjects( scene.children );
+            let intersects = raycaster.intersectObjects( this.selectionGroup );
 
             let selectedPoint;
             for(let i = 0; i < intersects.length; i++) {
@@ -89,10 +140,10 @@ class Cloth {
                     selectedPoint = intersects[i].object;
                 }
             }
+            if(this.control.object) {
+                this.unsetAnchorParticle(this.control.object.clothPosX, this.control.object.clothPosY);
+            }
             if(!selectedPoint) {
-                if(this.control.object) {
-                    this.unsetAnchorParticle(this.control.object.clothPosX, this.control.object.clothPosY);
-                }
                 this.control.detach();
                 return;
             }
@@ -107,14 +158,53 @@ class Cloth {
     }
 
     update(dt) {
+        dt = dt / 1000;
         this.updateControls();
 
-        dt = dt / 1000;
-        let numH = 10;
+        if(this.options.adaptive_step_size) {
 
-        for(let miniStep = 0; miniStep < numH; miniStep++) {
-            INTEGRATORS.integrateRungeKutta(this.clothState, dt / numH);
-            //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+            let singleStepState = this.clothState.clone();
+            let doubleStepState = this.clothState.clone();
+    
+            INTEGRATORS.integrateRungeKutta(singleStepState, dt);
+    
+            INTEGRATORS.integrateRungeKutta(doubleStepState, dt / 2);
+            INTEGRATORS.integrateRungeKutta(doubleStepState, dt / 2);
+    
+            let error = distance(singleStepState, doubleStepState);
+    
+            let newH = dt * Math.pow(this.options.max_error / error, 0.2);
+            let numSteps = dt / newH;
+    
+            if(numSteps > this.options.max_steps_per_frame) {
+                numSteps = this.options.max_steps_per_frame;
+                newH = dt / this.options.max_steps_per_frame;
+            } else {
+                numSteps = Math.ceil(numSteps);
+                newH = dt / numSteps;
+            }
+    
+            this.options.current_steps_per_frame = numSteps;
+            this.options.current_step_size = newH;
+    
+            for(let miniStep = 0; miniStep < numSteps; miniStep++) {
+                INTEGRATORS.integrateRungeKutta(this.clothState, newH);
+                //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+            }
+
+        } else {
+            let numSteps = this.options.max_steps_per_frame;
+            this.options.current_step_size = dt / numSteps;
+            this.options.current_steps_per_frame = numSteps;
+
+            for(let miniStep = 0; miniStep < numSteps; miniStep++) {
+                INTEGRATORS.integrateRungeKutta(this.clothState, dt / numSteps);
+                //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+            }
+        }
+
+        for (let i in this.generalGui.__controllers) {
+            this.generalGui.__controllers[i].updateDisplay();
         }
 
         for(let x = 0; x < this.width; x++) {
@@ -125,6 +215,29 @@ class Cloth {
             }
         }
 
+        this.updateMesh();
+        this.mesh.geometry.attributes.position.needsUpdate = true;
+        this.mesh.geometry.attributes.color.needsUpdate = true;
+    }
+
+    updateMesh() {
+        let vertecies = this.mesh.geometry.attributes.position.array;
+        let colors = this.mesh.geometry.attributes.color.array;
+
+        // vertecies, colors
+        for(let y = 0; y < this.height; y++) {
+            for(let x = 0; x < this.width; x++) {
+                vertecies[3 * (y * this.width + x) + 0] = this.clothState.positions[x][y].x;
+                vertecies[3 * (y * this.width + x) + 1] = this.clothState.positions[x][y].y;
+                vertecies[3 * (y * this.width + x) + 2] = this.clothState.positions[x][y].z;
+
+                colors[3 * (y * this.width + x) + 0] = 1;
+                colors[3 * (y * this.width + x) + 1] = 0;
+                colors[3 * (y * this.width + x) + 2] = 1;
+            }
+        }
+
+        this.mesh.geometry.computeVertexNormals();
     }
 
     updateControls() {

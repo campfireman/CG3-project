@@ -2,8 +2,6 @@ import * as THREE from "/three/three.module.js";
 
 import { ClothDeriv } from "./ClothDeriv.js";
 
-const AIR_RESISTANCE = 10;
-
 var isInfiniteMass = [];
 
 class ClothState {
@@ -55,7 +53,7 @@ class ClothState {
 
                 // Air resistance
                 let velMag = this.velocities[x][y].length();
-                let dragMag = velMag * velMag * AIR_RESISTANCE;
+                let dragMag = velMag * velMag * this.options.air_resistance;
                 let drag = this.velocities[x][y].clone().normalize().multiplyScalar(-dragMag);
                 force.add(drag);
 
@@ -105,6 +103,20 @@ class ClothState {
 
 };
 
+function distance(s1, s2) {
+    let sum = 0;
+    for(let x = 0; x < s1.width; x++) {
+        for(let y = 0; y < s1.height; y++) {
+            let diffPos = s1.positions[x][y].clone().sub(s2.positions[x][y]);
+            sum += diffPos.x * diffPos.x + diffPos.y * diffPos.y + diffPos.z * diffPos.z;
+
+            let diffVel = s1.velocities[x][y].clone().sub(s2.velocities[x][y]);
+            sum += diffVel.x * diffVel.x + diffVel.y * diffVel.y + diffVel.z * diffVel.z;
+        }
+    }
+    return Math.sqrt(sum);
+}
+
 function initMassArray(width, height) {
     for(let x = 0; x < width; x++) {
         isInfiniteMass.push([]);
@@ -118,4 +130,4 @@ function setInfiniteMass(x, y, isInfinite) {
     isInfiniteMass[x][y] = isInfinite;
 }
 
-export { ClothState, initMassArray, setInfiniteMass };
+export { ClothState, distance, initMassArray, setInfiniteMass };
