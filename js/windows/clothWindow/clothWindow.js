@@ -51,7 +51,7 @@ class ClothWindow extends Window {
         let clothFolder = this.gui.addFolder("cloth");
         clothFolder.add(this.guiOptions, "particle_distance", 0.001, 1.0).step(0.001);
         clothFolder.add(this.guiOptions, "particle_mass", 0.1, 10).step(0.001);
-        clothFolder.add(this.guiOptions, "toughness", 1, 20000).step(0.001);
+        clothFolder.add(this.guiOptions, "toughness", 1, 10000).step(0.001);
 
         clothFolder.add(this.guiOptions, "fix_left_corner")
         .onChange((leftCornerFixed) => {
