@@ -50,10 +50,9 @@ class ClothVisulization {
         this.meshVertecies = [];
         this.meshIndecies = [];
         this.meshUVs = [];
-        //this.meshColors = [];
+
         for(let i = 0; i < this.cloth.width * this.cloth.height * 3; i++) {
             this.meshVertecies.push(0);
-            //this.meshColors.push(0);
         }
         for(let i = 0; i < this.cloth.width * this.cloth.height * 2; i++) {
             this.meshUVs.push(0);
@@ -92,36 +91,19 @@ class ClothVisulization {
         this.meshGeometry.setIndex(this.meshIndecies);
 
         this.vertexBuffer = new THREE.Float32BufferAttribute(this.meshVertecies, 3);
-        this.vertexBuffer.needsUpdate = true;
         this.meshGeometry.setAttribute("position", this.vertexBuffer);
         this.meshGeometry.computeVertexNormals();
+
         let uvBuffer = new THREE.Float32BufferAttribute(this.meshUVs, 2, true);
         this.meshGeometry.setAttribute("uv", uvBuffer);
-        //let colorsBuffer = new THREE.Float32BufferAttribute(this.meshColors, 3, true);
-        //this.meshGeometry.setAttribute("color", colorsBuffer);
 
         this.meshMaterial = new THREE.MeshPhongMaterial({
             side: THREE.DoubleSide,
-            color: 0xffffff, 
-            specular: 0x111111, 
-            //map: new THREE.TextureLoader().load("/assets/textures/gray_cloth_fabric.jpg"),
-            map: new THREE.TextureLoader().load("/assets/textures/gray_cloth_fabric.jpg"),
-            //shininess: 0
-            //vertexColors: true
+            map: new THREE.TextureLoader().load("/assets/textures/gray_cloth_fabric.jpg")
         });
 
         this.mesh = new THREE.Mesh(this.meshGeometry, this.meshMaterial);
-        this.mesh.geometry.attributes.position.needsUpdate = true;
-        //this.mesh.geometry.attributes.color.needsUpdate = true;
         this.cloth.scene.add(this.mesh);
-
-        /*THREE.ImageUtils.loadTexture("/assets/textures/gray_cloth_fabric.jpg", (texture) => {
-            texture.wrapS = THREE.RepeatWrapping;
-            texture.wrapT = THREE.RepeatWrapping;
-            texture.repeat.set( 1, 1 );
-
-            this.mesh.material.map = texture;
-        });*/
 
         this.updateMesh();
         
@@ -154,17 +136,16 @@ class ClothVisulization {
                         (i >= 8 && i < 12 && this.cloth.options.showBendSprings)
                     )
                     {
-                        spring.geometry.vertices.pop()
-                        spring.geometry.vertices.pop()
                         let pos1 = this.cloth.particles[x][y].position;
                         let pos2 = this.cloth.particles[spring.other.x][spring.other.y].position;
                         let direction = pos1.clone().sub(pos2);
-                        spring.geometry.vertices.push(
-                            pos1, pos2,
-                        )
+
+                        spring.geometry.vertices[0] = pos1;
+                        spring.geometry.vertices[1] = pos2;
+
                         spring.geometry.verticesNeedUpdate = true;
                         let scale = this.clamp(direction.length() / val.restingDistance, 0, 2);
-                        let color = COLOR_REST;
+                        /*let color = COLOR_REST;
                         if (scale > 1) {
                             color = COLOR_STRETCHED;
                             scale = 1 - (scale - 1);
@@ -175,10 +156,23 @@ class ClothVisulization {
                         // exit if values go crazy
                         if (color == '#') {
                             return;
+                        }*/
+
+                        if(scale > 1) {
+                            let interpolated = this.lerp(0, 1.0, scale - 1);
+                            spring.line.material.color.r = interpolated;
+                            spring.line.material.color.g = 0;
+                            spring.line.material.color.b = 0;
+                        } else {
+                            let interpolated = this.lerp(0, 1.0, scale);
+                            spring.line.material.color.r = 0;
+                            spring.line.material.color.g = interpolated;
+                            spring.line.material.color.b = 0;
                         }
-                        spring.line.material = new THREE.LineBasicMaterial({
-                            color: color,
-                        });
+
+                        //spring.line.material = new THREE.LineBasicMaterial({
+                        //    color: color,
+                        //});
                         spring.line.visible = true;
                     } else {
                         spring.line.visible = false;
@@ -190,25 +184,18 @@ class ClothVisulization {
 
     updateMesh() {
         let vertecies = this.mesh.geometry.attributes.position.array;
-        //let colors = this.mesh.geometry.attributes.color.array;
 
-        // vertecies, colors
         for(let y = 0; y < this.cloth.height; y++) {
             for(let x = 0; x < this.cloth.width; x++) {
                 vertecies[3 * (y * this.cloth.width + x) + 0] = this.cloth.clothState.positions[x][y].x;
                 vertecies[3 * (y * this.cloth.width + x) + 1] = this.cloth.clothState.positions[x][y].y;
                 vertecies[3 * (y * this.cloth.width + x) + 2] = this.cloth.clothState.positions[x][y].z;
-
-                //colors[3 * (y * this.cloth.width + x) + 0] = 1;
-                //colors[3 * (y * this.cloth.width + x) + 1] = 0;
-                //colors[3 * (y * this.cloth.width + x) + 2] = 1;
             }
         }
 
         this.mesh.geometry.computeVertexNormals();
 
         this.mesh.geometry.attributes.position.needsUpdate = true;
-        //this.mesh.geometry.attributes.color.needsUpdate = true;
     }
 
     clamp(value, min, max) {
@@ -245,6 +232,11 @@ class ClothVisulization {
         if(h)return"rgb"+(f?"a(":"(")+r+","+g+","+b+(f?","+m(a*1000)/1000:"")+")";
         else return"#"+(4294967296+r*16777216+g*65536+b*256+(f?m(a*255):0)).toString(16).slice(1,f?undefined:-2)
     }
+
+    lerp(from, to, t) {
+        return (to - from) * t + from;
+    }
+
 }
 
 export { ClothVisulization };

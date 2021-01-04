@@ -72,7 +72,7 @@ class ClothState {
                     let otherX = x + spring.x;
                     let otherY = y + spring.y;
                     if (otherX >= 0 && otherX <= this.width - 1 && otherY >= 0 && otherY <= this.height -1) {
-                        force.add(this.calcSpringForce(this.positions[x][y], this.positions[otherX][otherY], spring.toughness(), spring.restingDistance));
+                        force.add(this.calcSpringForce(this.positions[x][y], this.positions[otherX][otherY], this.cloth.options.toughness, spring.restingDistance));
 
                         // use the chance to calculate normals as well
                         if (this.cloth.options.wind && i >= 0 && i < 4) {

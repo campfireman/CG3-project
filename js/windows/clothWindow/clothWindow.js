@@ -1,8 +1,10 @@
+import * as THREE from "/three/three.module.js";
+import * as DAT from "/dat/dat.gui.module.js";
+
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
+
 import { Window } from "../window.js";
 import { Cloth } from "./Cloth.js";
-import * as DAT from "/dat/dat.gui.module.js";
-import { OrbitControls } from "/jsm/controls/OrbitControls.js";
-import * as THREE from "/three/three.module.js";
 
 /**
  * TODO
@@ -47,8 +49,8 @@ class ClothWindow extends Window {
             windForce: 2,
 
             integrator: 1,
-            adaptive_step_size: false,
-            max_error: 2,
+            adaptive_step_size: true,
+            max_error: 1,
             max_steps_per_frame: 13,
             current_steps_per_frame: 0,
             current_step_size: 0,
@@ -63,7 +65,6 @@ class ClothWindow extends Window {
         this.gui = new DAT.GUI();
 
         let clothFolder = this.gui.addFolder("cloth");
-        //clothFolder.add(this.guiOptions, "particle_distance", 0.001, 1.0).step(0.001);
         clothFolder.add(this.guiOptions, "particle_mass", 0.1, 10).step(0.001);
         clothFolder.add(this.guiOptions, "toughness", 1, 10000).step(0.001);
 

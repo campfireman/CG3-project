@@ -181,6 +181,10 @@ class BezierWindow extends Window {
 		this.plotBernstein();
 	}
 
+	/**
+	 * get called every frame to update the animation
+	 * @param {number} time time since the last frame
+	 */
 	update(time) {
 		this.renderer.clearDepth();
 
@@ -206,7 +210,7 @@ class BezierWindow extends Window {
 
 	/**
 	 * draws a part or whole bezier curve
-	 * @param {*} progress normalized value (0-1) representing how much of the bezier curve should be drawn
+	 * @param {number} progress normalized value (0-1) representing how much of the bezier curve should be drawn
 	 */
 	updateBezierCurve(progress) {
 		let points = [];
@@ -231,8 +235,8 @@ class BezierWindow extends Window {
 
 	/**
 	 * draws the visualisation for the casteljau algorithm
-	 * @param {*} points control points for the bezeir curve
-	 * @param {*} t normalized value representing the point for which the visualization should be drawn.
+	 * @param {[THREE.Mesh]} points control points for the bezeir curve
+	 * @param {number} t normalized value representing the point for which the visualization should be drawn.
 	 */
 	updateBezierControls(points, t) {
 		let initialLength = points.length;
@@ -263,8 +267,8 @@ class BezierWindow extends Window {
 
 	/**
 	 * bezier function
-	 * @param {*} points control points
-	 * @param {*} t variable
+	 * @param {[THREE.Mesh]} points control points
+	 * @param {number} t variable
 	 */
 	bezier(points, t) {
 		let initialLength = points.length;
@@ -283,9 +287,9 @@ class BezierWindow extends Window {
 
 	/**
 	 * function for calculating berstein polynomials
-	 * @param {*} n 
-	 * @param {*} k 
-	 * @param {*} t 
+	 * @param {number} n 
+	 * @param {number} k 
+	 * @param {number} t 
 	 */
 	bernsteinPolynomial(n, k, t) {
 		let binCoef = PASCALS_TRIANGLE[n][k];
@@ -294,7 +298,7 @@ class BezierWindow extends Window {
 
 	/**
 	 * calculates the most impactful bernstein polynomial for a given x
-	 * @param {*} xNormalized variable between 0-1
+	 * @param {number} xNormalized variable between 0-1
 	 */
 	getMaxBernsteinIndex(xNormalized) {
 		let maxBernsteinIndex = 0;
@@ -309,7 +313,7 @@ class BezierWindow extends Window {
 
 	/**
 	 * caches the bernstein polynomials so they don't have to be calculated every time
-	 * @param {*} steps how many steps should be calculated
+	 * @param {number} steps how many steps should be calculated
 	 */
 	cacheBernsteinCurves(steps) {
 		this.bernsteinCurvesCache = [];

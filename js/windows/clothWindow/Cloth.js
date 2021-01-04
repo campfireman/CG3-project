@@ -29,8 +29,6 @@ class Cloth {
 
         this.partDistance = partDistance;
         this.partMass = partMass;
-        this.toughness = () => { return this.options.toughness };
-        this.gravity = () => { return this.options.gravity }
 
         this.particles = [];
         this.selectionGroup = [];
