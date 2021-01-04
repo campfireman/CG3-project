@@ -8,10 +8,9 @@ var isInfiniteMass = [];
 
 class ClothState {
 
-    constructor(cloth, options) {
+    constructor(cloth) {
         this.width = cloth.width;
         this.height = cloth.height;
-        this.options = options;
         this.cloth = cloth;
 
         this.positions = [];
@@ -52,7 +51,7 @@ class ClothState {
                 let force = new THREE.Vector3();
 
                 // Gravity
-                force.y += -this.options.gravity;
+                force.y += -this.cloth.gravity();
 
                 // Air resistance
                 let velMag = this.velocities[x][y].length();
@@ -72,7 +71,7 @@ class ClothState {
                 if(isInfiniteMass[x][y]) {
                     force.multiplyScalar(0);
                 } else {
-                    force.multiplyScalar(1 / this.options.particle_mass);
+                    force.multiplyScalar(1 / this.cloth.partMass);
                 }
                 
                 deriv.dVel[x][y] = force.multiplyScalar(h);
@@ -83,7 +82,7 @@ class ClothState {
     }
 
     clone() {
-        let ret = new ClothState(this.cloth, this.options);
+        let ret = new ClothState(this.cloth);
 
         for(let x = 0; x < this.width; x++) {
             for(let y = 0; y < this.height; y++) {

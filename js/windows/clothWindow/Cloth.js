@@ -20,6 +20,7 @@ class Cloth {
         this.scene = scene
 
         this.partDistance = partDistance;
+        this.partMass = partMass;
         this.toughness = () => { return this.options.toughness };
         this.gravity = () => { return this.options.gravity }
 
@@ -28,7 +29,7 @@ class Cloth {
 
         this.integrator = INTEGRATOR_LIST[options.integrator];
 
-        this.clothState = new ClothState(this, options);
+        this.clothState = new ClothState(this);
 
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
