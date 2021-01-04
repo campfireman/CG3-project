@@ -1,6 +1,6 @@
+import { ClothDeriv } from "./ClothDeriv.js";
 import * as THREE from "/three/three.module.js";
 
-import { ClothDeriv } from "./ClothDeriv.js";
 
 const AIR_RESISTANCE = 10;
 

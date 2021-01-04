@@ -15,7 +15,7 @@ import * as THREE from "/three/three.module.js";
  *  triangle mesh (coloring)    Albert
  *  shear bend springs          Ture
  *  integrating                 Ture, Albert done
- *  intergrator switching       Ture
+ *  intergrator switching       Ture done
  *  airresistance gui           Albert
  *  adaptive steps              Albert
  *  spring visualizing          Ture
