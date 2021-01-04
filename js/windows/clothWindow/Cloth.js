@@ -69,6 +69,13 @@ class Cloth {
         this.springs.push({x: 1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
         this.springs.push({x: 1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
 
+        // bend springs
+        let bendSpringLength = 2;
+        this.bendSpringDistance = this.partDistance * bendSpringLength;
+        this.springs.push({x: 1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: 0, y: 1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: -1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: 0, y: -1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
     }
     
     initControls(scene, camera, renderer, orbitControl) {
