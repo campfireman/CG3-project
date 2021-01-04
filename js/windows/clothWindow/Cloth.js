@@ -20,14 +20,15 @@ class Cloth {
         this.scene = scene
 
         this.partDistance = partDistance;
-        this.toughness = toughness;
+        this.toughness = () => { return this.options.toughness };
+        this.gravity = () => { return this.options.gravity }
 
         this.particles = [];
         this.selectionGroup = [];
 
         this.integrator = INTEGRATOR_LIST[options.integrator];
 
-        this.clothState = new ClothState(width, height, options);
+        this.clothState = new ClothState(this, options);
 
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
@@ -53,8 +54,23 @@ class Cloth {
 
         this.initControls(scene, camera, renderer, orbitControl);
 
-    }
+        this.springs = [];
 
+        // basic grid
+        this.springs.push({x: 1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 0, y: 1, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: -1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 0, y: -1, toughness: this.toughness, restingDistance: this.partDistance})
+
+        // shear springs
+        this.diagonalRestingDistance = Math.sqrt(this.partDistance*this.partDistance + this.partDistance*this.partDistance)
+        this.springs.push({x: -1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: -1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: 1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: 1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+
+    }
+    
     initControls(scene, camera, renderer, orbitControl) {
         this.justMoved = false;
 
