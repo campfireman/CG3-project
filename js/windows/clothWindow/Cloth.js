@@ -1,16 +1,21 @@
 import { ClothState, distance, initMassArray, setInfiniteMass } from "./ClothState.js";
-import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
 import * as INTEGRATORS from "./Intergrators.js";
-import { Spring } from "./Spring.js";
+import { ClothVisulization } from "./ClothVisulization.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
 
-/*const INTEGRATORS = [
-    integrateEuler,
-    integrateRungeKutta
-];*/
+const INTEGRATOR_LIST = [
+    {
+        integrator: INTEGRATORS.integrateEuler,
+        order: 2
+    },
+    {
+        integrator: INTEGRATORS.integrateRungeKutta,
+        order: 5
+    }
+];
 
-const sphereGeometry = new THREE.SphereGeometry(0.05, 32, 32);
+const sphereGeometry = new THREE.SphereGeometry(0.06, 32, 32);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 class Cloth {
@@ -23,14 +28,16 @@ class Cloth {
         this.scene = scene
 
         this.partDistance = partDistance;
-        this.toughness = toughness;
+        this.partMass = partMass;
+        this.toughness = () => { return this.options.toughness };
+        this.gravity = () => { return this.options.gravity }
 
         this.particles = [];
         this.selectionGroup = [];
 
-        this.clothState = new ClothState(width, height, options);
+        this.integrator = INTEGRATOR_LIST[options.integrator];
 
-        this.integrator = INTEGRATORS[options.integrator];
+        this.clothState = new ClothState(this);
 
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
@@ -56,59 +63,33 @@ class Cloth {
 
         this.initControls(scene, camera, renderer, orbitControl);
 
+        this.springs = [];
 
-        this.meshVertecies = [];
-        this.meshIndecies = [];
-        this.meshColors = [];
-        for(let i = 0; i < width * height * 3; i++) {
-            this.meshVertecies.push(0);
-            this.meshColors.push(0);
-        }
-        for(let i = 0; i < (width - 1) * (height - 1) * 2; i++) {
-            this.meshIndecies.push(0, 0, 0);
-        }
+        // basic grid
+        this.springs.push({x: 0, y: 1, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 0, y: -1, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: -1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
 
-        for(let y = 0; y < this.height - 1; y++) {
-            for(let x = 0; x < this.width - 1; x++) {
-                let a = (y * this.width + x);
-                let b = ((y + 1) * this.width + x);
-                let c = ((y + 1) * this.width + x + 1);
-                let d = (y * this.width + x + 1);
+        // shear springs
+        this.diagonalRestingDistance = Math.sqrt(this.partDistance*this.partDistance + this.partDistance*this.partDistance)
+        this.springs.push({x: -1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: -1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: 1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: 1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
 
-                let faceStartIndex = 6 * (y * (this.width - 1) + x);
+        // bend springs
+        let bendSpringLength = 2;
+        this.bendSpringDistance = this.partDistance * bendSpringLength;
+        this.springs.push({x: 1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: 0, y: 1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: -1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: 0, y: -1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
 
-                this.meshIndecies[faceStartIndex + 0] = a;
-                this.meshIndecies[faceStartIndex + 1] = b;
-                this.meshIndecies[faceStartIndex + 2] = c;
-
-                this.meshIndecies[faceStartIndex + 3] = a;
-                this.meshIndecies[faceStartIndex + 4] = c;
-                this.meshIndecies[faceStartIndex + 5] = d;
-            }
-        }
-
-        this.meshGeometry = new THREE.BufferGeometry();
-        this.meshGeometry.setIndex(this.meshIndecies);
-
-        this.vertexBuffer = new THREE.Float32BufferAttribute(this.meshVertecies, 3);
-        this.vertexBuffer.needsUpdate = true;
-        this.meshGeometry.setAttribute("position", this.vertexBuffer);
-        this.meshGeometry.computeVertexNormals();
-        let colorsBuffer = new THREE.Float32BufferAttribute(this.meshColors, 3, true);
-        this.meshGeometry.setAttribute("color", colorsBuffer);
-
-        this.meshMaterial = new THREE.MeshPhongMaterial({
-            side: THREE.DoubleSide,
-            vertexColors: true
-        });
-
-        this.mesh = new THREE.Mesh(this.meshGeometry, this.meshMaterial);
-        this.mesh.geometry.attributes.position.needsUpdate = true;
-        this.mesh.geometry.attributes.color.needsUpdate = true;
-        scene.add(this.mesh);
-
+        // spring visulization
+        this.springVisulization = new ClothVisulization(this);
     }
-
+    
     initControls(scene, camera, renderer, orbitControl) {
         this.justMoved = false;
 
@@ -166,14 +147,14 @@ class Cloth {
             let singleStepState = this.clothState.clone();
             let doubleStepState = this.clothState.clone();
     
-            INTEGRATORS.integrateRungeKutta(singleStepState, dt);
+            this.integrator.integrator(singleStepState, dt);
     
-            INTEGRATORS.integrateRungeKutta(doubleStepState, dt / 2);
-            INTEGRATORS.integrateRungeKutta(doubleStepState, dt / 2);
+            this.integrator.integrator(doubleStepState, dt / 2);
+            this.integrator.integrator(doubleStepState, dt / 2);
     
             let error = distance(singleStepState, doubleStepState);
     
-            let newH = dt * Math.pow(this.options.max_error / error, 0.2);
+            let newH = dt * Math.pow(this.options.max_error / error, 1 / this.integrator.order);
             let numSteps = dt / newH;
     
             if(numSteps > this.options.max_steps_per_frame) {
@@ -188,8 +169,7 @@ class Cloth {
             this.options.current_step_size = newH;
     
             for(let miniStep = 0; miniStep < numSteps; miniStep++) {
-                INTEGRATORS.integrateRungeKutta(this.clothState, newH);
-                //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+                this.integrator.integrator(this.clothState, dt / numSteps);
             }
 
         } else {
@@ -198,8 +178,7 @@ class Cloth {
             this.options.current_steps_per_frame = numSteps;
 
             for(let miniStep = 0; miniStep < numSteps; miniStep++) {
-                INTEGRATORS.integrateRungeKutta(this.clothState, dt / numSteps);
-                //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+                this.integrator.integrator(this.clothState, dt / numSteps);
             }
         }
 
@@ -212,32 +191,11 @@ class Cloth {
                 this.particles[x][y].position.x = this.clothState.positions[x][y].x;
                 this.particles[x][y].position.y = this.clothState.positions[x][y].y;
                 this.particles[x][y].position.z = this.clothState.positions[x][y].z;
+                this.particles[x][y].visible = this.options.showParticles;
             }
         }
 
-        this.updateMesh();
-        this.mesh.geometry.attributes.position.needsUpdate = true;
-        this.mesh.geometry.attributes.color.needsUpdate = true;
-    }
-
-    updateMesh() {
-        let vertecies = this.mesh.geometry.attributes.position.array;
-        let colors = this.mesh.geometry.attributes.color.array;
-
-        // vertecies, colors
-        for(let y = 0; y < this.height; y++) {
-            for(let x = 0; x < this.width; x++) {
-                vertecies[3 * (y * this.width + x) + 0] = this.clothState.positions[x][y].x;
-                vertecies[3 * (y * this.width + x) + 1] = this.clothState.positions[x][y].y;
-                vertecies[3 * (y * this.width + x) + 2] = this.clothState.positions[x][y].z;
-
-                colors[3 * (y * this.width + x) + 0] = 1;
-                colors[3 * (y * this.width + x) + 1] = 0;
-                colors[3 * (y * this.width + x) + 2] = 1;
-            }
-        }
-
-        this.mesh.geometry.computeVertexNormals();
+        this.springVisulization.update();
     }
 
     updateControls() {
@@ -269,12 +227,7 @@ class Cloth {
     }
 
     setIntegrator(index) {
-        this.integrator = INTEGRATORS[index];
-        for(let x = 0; x < this.width; x++) {
-            for(let y = 0; y < this.height; y++) {
-                this.particles[x][y].setIntegrator(this.integrator);
-            }
-        }
+        this.integrator = INTEGRATOR_LIST[index];
     }
 
 }
