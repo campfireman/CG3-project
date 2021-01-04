@@ -12,6 +12,7 @@ import {
   Vector3
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
+import { Label } from "./Label.js";
 import { QuaternionAngle } from "./Quaternion.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 import { Line2 } from "/jsm/lines/Line2.js";
@@ -140,6 +141,15 @@ class QuaternionWindow extends Window {
     this.iAxis = new ArrowHelper(new Vector3(1, 0, 0), origin, 2, I_AXIS_COLOR);
     this.jAxis = new ArrowHelper(new Vector3(0, 1, 0), origin, 2, J_AXIS_COLOR);
     this.kAxis = new ArrowHelper(new Vector3(0, 0, 1), origin, 2, K_AXIS_COLOR);
+
+    this.sphereAxisLabels = [];
+    this.sphereAxisLabels.push(
+      new Label(new Vector3(2.5, 0, 0), "1", this.camera),
+      new Label(new Vector3(4.5, 0, 0), "i", this.camera),
+      new Label(new Vector3(2.5, 2, 0), "j", this.camera),
+      new Label(new Vector3(2.5, 0, 2), "k", this.camera),
+    )
+
     this.sphere.add(this.iAxis);
     this.sphere.add(this.jAxis);
     this.sphere.add(this.kAxis);
@@ -379,12 +389,16 @@ class QuaternionWindow extends Window {
     this.scene.add(this.rotationArrowLine);
     this.scene.add(this.rotationArrowTip);
     this.scene.add(this.rotationAxisArrow);
+    
   }
   /**
    * Animates the given object with the given quaternions, distributes time evenly quaternions
    * @param {int} delta_t milliseconds since last frame
    */
   update(delta_t) {
+    this.sphereAxisLabels.forEach((label) => {
+      label.updatePosition();
+    });
     if (this.object != null && this.options.animate) {
       // fencepost: if animation just started set values
       if (this.first) {
