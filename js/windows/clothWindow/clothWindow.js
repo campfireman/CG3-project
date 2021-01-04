@@ -43,6 +43,8 @@ class ClothWindow extends Window {
             fix_right_corner: true,
 
             gravity: 2,
+            wind: true,
+
             integrator: 1,
 
             showParticles: true,
@@ -81,6 +83,7 @@ class ClothWindow extends Window {
 
         let envFolder = this.gui.addFolder("environment");
         envFolder.add(this.guiOptions, "gravity", 1, 100);
+        envFolder.add(this.guiOptions, "wind");
         envFolder.open();
         
         let generalFolder = this.gui.addFolder("general");

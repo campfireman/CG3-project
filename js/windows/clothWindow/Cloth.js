@@ -59,10 +59,10 @@ class Cloth {
         this.springs = [];
 
         // basic grid
-        this.springs.push({x: 1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
         this.springs.push({x: 0, y: 1, toughness: this.toughness, restingDistance: this.partDistance})
-        this.springs.push({x: -1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
         this.springs.push({x: 0, y: -1, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: -1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
 
         // shear springs
         this.diagonalRestingDistance = Math.sqrt(this.partDistance*this.partDistance + this.partDistance*this.partDistance)

@@ -3,6 +3,7 @@ import * as THREE from "/three/three.module.js";
 
 
 const AIR_RESISTANCE = 10;
+const WIND_MULTIPLIER = 3;
 
 var isInfiniteMass = [];
 
@@ -43,15 +44,25 @@ class ClothState {
 
     getDeriv(h) {
         let deriv = new ClothDeriv(this.width, this.height);
+        let windForce = new THREE.Vector3(0, 0, 0);
+        if (this.cloth.options.wind) {
+            const windStrength = Math.cos( h * 7 ) * WIND_MULTIPLIER;
+
+            windForce.set( Math.sin( h / 20 ), Math.cos( h / 30), Math.sin( h / 10) );
+            windForce.normalize();
+            windForce.multiplyScalar( windStrength );
+        }
 
         for(let x = 0; x < this.width; x++) {
             for(let y = 0; y < this.height; y++) {
                 deriv.dPos[x][y] = this.velocities[x][y].clone().multiplyScalar(h);
 
                 let force = new THREE.Vector3();
+                let normals = [];
 
                 // Gravity
                 force.y += -this.cloth.gravity();
+
 
                 // Air resistance
                 let velMag = this.velocities[x][y].length();
@@ -60,13 +71,32 @@ class ClothState {
                 force.add(drag);
 
                 // Springs
-                this.cloth.springs.forEach((spring) => {
+                this.cloth.springs.forEach((spring, i) => {
                     let otherX = x + spring.x;
                     let otherY = y + spring.y;
                     if (otherX >= 0 && otherX <= this.width - 1 && otherY >= 0 && otherY <= this.height -1) {
                         force.add(this.calcSpringForce(this.positions[x][y], this.positions[otherX][otherY], spring.toughness(), spring.restingDistance));
+
+                        // use the chance to calculate normals as well
+                        if (this.cloth.options.wind && i >= 0 && i < 4) {
+                            normals.push(this.positions[x][y].clone().sub(this.positions[otherX][otherY]));
+                        }
                     }
                 })
+
+                // wind
+                if (this.cloth.options.wind) {
+                    let normal = normals[0].cross(normals[1]);
+                    if (normals.length == 4) {
+                    let normal1 = normals[0].cross(normals[1]);
+                    let normal2 = normals[2].cross(normals[3]);
+
+                    normal = normal1.add(normal2).multiplyScalar(0.5);
+                    }
+                    normal.normalize();
+                    let tmpForce = normal.clone().multiplyScalar(normal.dot(windForce));
+                    force.add(tmpForce);
+                }
 
                 if(isInfiniteMass[x][y]) {
                     force.multiplyScalar(0);
