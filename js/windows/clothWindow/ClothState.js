@@ -1,25 +1,23 @@
+import { ClothDeriv } from "./ClothDeriv.js";
 import * as THREE from "/three/three.module.js";
 
-import { ClothDeriv } from "./ClothDeriv.js";
-
-const AIR_RESISTANCE = 10;
 
 var isInfiniteMass = [];
 
 class ClothState {
 
-    constructor(width, height, options) {
-        this.width = width;
-        this.height = height;
-        this.options = options;
+    constructor(cloth) {
+        this.width = cloth.width;
+        this.height = cloth.height;
+        this.cloth = cloth;
 
         this.positions = [];
         this.velocities = [];
 
-        for(let x = 0; x < width; x++) {
+        for(let x = 0; x < this.width; x++) {
             this.positions.push([]);
             this.velocities.push([]);
-            for(let y = 0; y < height; y++) {
+            for(let y = 0; y < this.height; y++) {
                 this.positions[x].push(new THREE.Vector3());
                 this.velocities[x].push(new THREE.Vector3());
             }
@@ -43,36 +41,64 @@ class ClothState {
 
     getDeriv(h) {
         let deriv = new ClothDeriv(this.width, this.height);
+        let windForce = new THREE.Vector3(0, 0, 0);
+        if (this.cloth.options.wind) {
+            const windStrength = Math.cos( h * 7 ) * this.cloth.options.windForce;
+
+            windForce.set( Math.sin( h / 20 ), Math.cos( h / 30), Math.sin( h / 10) );
+            windForce.normalize();
+            windForce.multiplyScalar( windStrength );
+        }
 
         for(let x = 0; x < this.width; x++) {
             for(let y = 0; y < this.height; y++) {
                 deriv.dPos[x][y] = this.velocities[x][y].clone().multiplyScalar(h);
 
                 let force = new THREE.Vector3();
+                let normals = [];
 
                 // Gravity
-                force.y += -this.options.gravity;
+                // force.y += -this.cloth.gravity();
+                force.y += -this.cloth.options.gravity;
 
                 // Air resistance
                 let velMag = this.velocities[x][y].length();
-                let dragMag = velMag * velMag * AIR_RESISTANCE;
+                let dragMag = velMag * velMag * this.cloth.options.air_resistance;
                 let drag = this.velocities[x][y].clone().normalize().multiplyScalar(-dragMag);
                 force.add(drag);
 
                 // Springs
-                if(x < this.positions.length - 1)
-                    force.add(this.calcSpringForce(this.positions[x][y], this.positions[x+1][y]));
-                if(y < this.positions[x].length - 1)
-                    force.add(this.calcSpringForce(this.positions[x][y], this.positions[x][y+1]));
-                if(x > 0)
-                    force.add(this.calcSpringForce(this.positions[x][y], this.positions[x-1][y]));
-                if(y > 0)
-                    force.add(this.calcSpringForce(this.positions[x][y], this.positions[x][y-1]));
+                this.cloth.springs.forEach((spring, i) => {
+                    let otherX = x + spring.x;
+                    let otherY = y + spring.y;
+                    if (otherX >= 0 && otherX <= this.width - 1 && otherY >= 0 && otherY <= this.height -1) {
+                        force.add(this.calcSpringForce(this.positions[x][y], this.positions[otherX][otherY], spring.toughness(), spring.restingDistance));
+
+                        // use the chance to calculate normals as well
+                        if (this.cloth.options.wind && i >= 0 && i < 4) {
+                            normals.push(this.positions[x][y].clone().sub(this.positions[otherX][otherY]));
+                        }
+                    }
+                });
+
+                // wind
+                if (this.cloth.options.wind) {
+                    let normal = normals[0].cross(normals[1]);
+                    if (normals.length == 4) {
+                        let normal1 = normals[0].cross(normals[1]);
+                        let normal2 = normals[2].cross(normals[3]);
+
+                        normal = normal1.add(normal2).multiplyScalar(0.5);
+                    }
+                    normal.normalize();
+                    let tmpForce = normal.clone().multiplyScalar(normal.dot(windForce));
+                    force.add(tmpForce);
+                }
 
                 if(isInfiniteMass[x][y]) {
                     force.multiplyScalar(0);
                 } else {
-                    force.multiplyScalar(1 / this.options.particle_mass);
+                    force.multiplyScalar(1 / this.cloth.options.particle_mass);
                 }
                 
                 deriv.dVel[x][y] = force.multiplyScalar(h);
@@ -83,7 +109,7 @@ class ClothState {
     }
 
     clone() {
-        let ret = new ClothState(this.width, this.height, this.options);
+        let ret = new ClothState(this.cloth);
 
         for(let x = 0; x < this.width; x++) {
             for(let y = 0; y < this.height; y++) {
@@ -95,15 +121,29 @@ class ClothState {
         return ret;
     }
 
-    calcSpringForce(pos1, pos2) {
+    calcSpringForce(pos1, pos2, toughness, restingDistance) {
         let direction =  pos2.clone().sub(pos1);
-        let displacement = direction.length() - this.options.particle_distance;
-        let force = direction.setLength(this.options.toughness * displacement);
+        let displacement = direction.length() - restingDistance;
+        let force = direction.setLength(toughness * displacement);
         
         return force;
     }
 
 };
+
+function distance(s1, s2) {
+    let sum = 0;
+    for(let x = 0; x < s1.width; x++) {
+        for(let y = 0; y < s1.height; y++) {
+            let diffPos = s1.positions[x][y].clone().sub(s2.positions[x][y]);
+            sum += diffPos.x * diffPos.x + diffPos.y * diffPos.y + diffPos.z * diffPos.z;
+
+            let diffVel = s1.velocities[x][y].clone().sub(s2.velocities[x][y]);
+            sum += diffVel.x * diffVel.x + diffVel.y * diffVel.y + diffVel.z * diffVel.z;
+        }
+    }
+    return Math.sqrt(sum);
+}
 
 function initMassArray(width, height) {
     for(let x = 0; x < width; x++) {
@@ -118,4 +158,4 @@ function setInfiniteMass(x, y, isInfinite) {
     isInfiniteMass[x][y] = isInfinite;
 }
 
-export { ClothState, initMassArray, setInfiniteMass };
+export { ClothState, distance, initMassArray, setInfiniteMass };

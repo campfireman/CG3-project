@@ -3,6 +3,7 @@
 import { BezierWindow } from "./windows/bezierWindow/bezierWindow.js";
 import { ClothWindow } from "./windows/clothWindow/clothWindow.js";
 import { QuaternionWindow } from "./windows/quaternionWindow/quaternionWindow.js";
+import Stats from "/jsm/libs/stats.module.js";
 import * as DAT from "/dat/dat.gui.module.js";
 import * as THREE from "/three/three.module.js";
 
@@ -25,6 +26,10 @@ var windowIndecies = {
 var globalOptions = {
   window: 2,
 };
+
+var stats = new Stats();
+stats.showPanel(0);
+document.body.appendChild(stats.dom);
 
 var lastTme = 0;
 
@@ -53,11 +58,13 @@ document
   .appendChild(windowsSelectGui.domElement);
 
 function animate(time) {
+  stats.begin();
   currentWindow.update(time - lastTme);
   lastTme = time;
 
   renderer.render(currentWindow.getScene(), currentWindow.getCamera());
 
   requestAnimationFrame(animate);
+  stats.end();
 }
 requestAnimationFrame(animate);

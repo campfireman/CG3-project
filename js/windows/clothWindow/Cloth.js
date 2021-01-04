@@ -1,36 +1,43 @@
-import { ClothState, initMassArray, setInfiniteMass } from "./ClothState.js";
-import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
+import { ClothState, distance, initMassArray, setInfiniteMass } from "./ClothState.js";
 import * as INTEGRATORS from "./Intergrators.js";
-import { Particle } from "./Particle.js";
-import { Spring } from "./Spring.js";
+import { ClothVisulization } from "./ClothVisulization.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
 
-/*const INTEGRATORS = [
-    integrateEuler,
-    integrateRungeKutta
-];*/
+const INTEGRATOR_LIST = [
+    {
+        integrator: INTEGRATORS.integrateEuler,
+        order: 2
+    },
+    {
+        integrator: INTEGRATORS.integrateRungeKutta,
+        order: 5
+    }
+];
 
-const sphereGeometry = new THREE.SphereGeometry(0.03, 32, 32);
+const sphereGeometry = new THREE.SphereGeometry(0.06, 32, 32);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 class Cloth {
 
-    constructor(scene, camera, renderer, orbitControl, options, width, height, pos, partDistance, partMass, toughness) {
+    constructor(scene, camera, renderer, orbitControl, options, generalGui, width, height, pos, partDistance, partMass, toughness) {
         this.options = options;
+        this.generalGui = generalGui;
         this.width = width;
         this.height = height;
         this.scene = scene
 
         this.partDistance = partDistance;
-        this.toughness = toughness;
+        this.partMass = partMass;
+        this.toughness = () => { return this.options.toughness };
+        this.gravity = () => { return this.options.gravity }
 
         this.particles = [];
         this.selectionGroup = [];
 
-        this.integrator = INTEGRATORS[options.integrator];
+        this.integrator = INTEGRATOR_LIST[options.integrator];
 
-        this.clothState = new ClothState(width, height, options);
+        this.clothState = new ClothState(this);
 
         for(let x = 0; x < width; x++) {
             this.particles.push([]);
@@ -56,8 +63,33 @@ class Cloth {
 
         this.initControls(scene, camera, renderer, orbitControl);
 
-    }
+        this.springs = [];
 
+        // basic grid
+        this.springs.push({x: 0, y: 1, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: 0, y: -1, toughness: this.toughness, restingDistance: this.partDistance})
+        this.springs.push({x: -1, y: 0, toughness: this.toughness, restingDistance: this.partDistance})
+
+        // shear springs
+        this.diagonalRestingDistance = Math.sqrt(this.partDistance*this.partDistance + this.partDistance*this.partDistance)
+        this.springs.push({x: -1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: -1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: 1, y: -1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+        this.springs.push({x: 1, y: 1, toughness: this.toughness, restingDistance: this.diagonalRestingDistance})
+
+        // bend springs
+        let bendSpringLength = 2;
+        this.bendSpringDistance = this.partDistance * bendSpringLength;
+        this.springs.push({x: 1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: 0, y: 1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: -1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+        this.springs.push({x: 0, y: -1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+
+        // spring visulization
+        this.springVisulization = new ClothVisulization(this);
+    }
+    
     initControls(scene, camera, renderer, orbitControl) {
         this.justMoved = false;
 
@@ -81,7 +113,7 @@ class Cloth {
 			let raycaster = new THREE.Raycaster();
 
 			raycaster.setFromCamera(mouseVector, camera);
-            let intersects = raycaster.intersectObjects( scene.children );
+            let intersects = raycaster.intersectObjects( this.selectionGroup );
 
             let selectedPoint;
             for(let i = 0; i < intersects.length; i++) {
@@ -89,10 +121,10 @@ class Cloth {
                     selectedPoint = intersects[i].object;
                 }
             }
+            if(this.control.object) {
+                this.unsetAnchorParticle(this.control.object.clothPosX, this.control.object.clothPosY);
+            }
             if(!selectedPoint) {
-                if(this.control.object) {
-                    this.unsetAnchorParticle(this.control.object.clothPosX, this.control.object.clothPosY);
-                }
                 this.control.detach();
                 return;
             }
@@ -107,14 +139,51 @@ class Cloth {
     }
 
     update(dt) {
+        dt = dt / 1000;
         this.updateControls();
 
-        dt = dt / 1000;
-        let numH = 10;
+        if(this.options.adaptive_step_size) {
 
-        for(let miniStep = 0; miniStep < numH; miniStep++) {
-            INTEGRATORS.integrateRungeKutta(this.clothState, dt / numH);
-            //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+            let singleStepState = this.clothState.clone();
+            let doubleStepState = this.clothState.clone();
+    
+            this.integrator.integrator(singleStepState, dt);
+    
+            this.integrator.integrator(doubleStepState, dt / 2);
+            this.integrator.integrator(doubleStepState, dt / 2);
+    
+            let error = distance(singleStepState, doubleStepState);
+    
+            let newH = dt * Math.pow(this.options.max_error / error, 1 / this.integrator.order);
+            let numSteps = dt / newH;
+    
+            if(numSteps > this.options.max_steps_per_frame) {
+                numSteps = this.options.max_steps_per_frame;
+                newH = dt / this.options.max_steps_per_frame;
+            } else {
+                numSteps = Math.ceil(numSteps);
+                newH = dt / numSteps;
+            }
+    
+            this.options.current_steps_per_frame = numSteps;
+            this.options.current_step_size = newH;
+    
+            for(let miniStep = 0; miniStep < numSteps; miniStep++) {
+                this.integrator.integrator(this.clothState, dt / numSteps);
+            }
+
+        } else {
+            let numSteps = this.options.max_steps_per_frame;
+            this.options.current_step_size = dt / numSteps;
+            this.options.current_steps_per_frame = numSteps;
+
+            for(let miniStep = 0; miniStep < numSteps; miniStep++) {
+                this.integrator.integrator(this.clothState, dt / numSteps);
+            }
+        }
+
+        for (let i in this.generalGui.__controllers) {
+            this.generalGui.__controllers[i].updateDisplay();
         }
 
         for(let x = 0; x < this.width; x++) {
@@ -122,9 +191,11 @@ class Cloth {
                 this.particles[x][y].position.x = this.clothState.positions[x][y].x;
                 this.particles[x][y].position.y = this.clothState.positions[x][y].y;
                 this.particles[x][y].position.z = this.clothState.positions[x][y].z;
+                this.particles[x][y].visible = this.options.showParticles;
             }
         }
 
+        this.springVisulization.update();
     }
 
     updateControls() {
@@ -156,12 +227,7 @@ class Cloth {
     }
 
     setIntegrator(index) {
-        this.integrator = INTEGRATORS[index];
-        for(let x = 0; x < this.width; x++) {
-            for(let y = 0; y < this.height; y++) {
-                this.particles[x][y].setIntegrator(this.integrator);
-            }
-        }
+        this.integrator = INTEGRATOR_LIST[index];
     }
 
 }
