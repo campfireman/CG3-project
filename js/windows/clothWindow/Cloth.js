@@ -1,4 +1,5 @@
 import { ClothState, initMassArray, setInfiniteMass } from "./ClothState.js";
+import { ClothVisulization } from "./ClothVisulization.js";
 import * as INTEGRATORS from "./Intergrators.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
@@ -77,6 +78,9 @@ class Cloth {
         this.springs.push({x: 0, y: 1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
         this.springs.push({x: -1 * bendSpringLength, y: 0, toughness: this.toughness, restingDistance: this.bendSpringDistance})
         this.springs.push({x: 0, y: -1 * bendSpringLength, toughness: this.toughness, restingDistance: this.bendSpringDistance})
+
+        // spring visulization
+        this.springVisulization = new ClothVisulization(this);
     }
     
     initControls(scene, camera, renderer, orbitControl) {
@@ -144,7 +148,7 @@ class Cloth {
                 this.particles[x][y].position.z = this.clothState.positions[x][y].z;
             }
         }
-
+        this.springVisulization.update();
     }
 
     updateControls() {
