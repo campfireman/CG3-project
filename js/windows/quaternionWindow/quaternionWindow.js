@@ -484,9 +484,11 @@ class QuaternionWindow extends Window {
     let x = this.random();
     let y = this.random();
     let z = this.random();
+
     if (x == 0 && y == 0 && z == 0) {
       x = 0;
     }
+    
     let attributes = {
       folder: newQuaternionFolder,
       quaternion: new QuaternionAngle(DEFAULT_THETA_VALUE, x, y, z),
