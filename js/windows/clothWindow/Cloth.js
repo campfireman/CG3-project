@@ -1,8 +1,5 @@
 import { ClothState, initMassArray, setInfiniteMass } from "./ClothState.js";
-import { integrateEuler, integrateRungeKutta } from "./Intergrators.js";
 import * as INTEGRATORS from "./Intergrators.js";
-import { Particle } from "./Particle.js";
-import { Spring } from "./Spring.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
 
@@ -110,11 +107,11 @@ class Cloth {
         this.updateControls();
 
         dt = dt / 1000;
-        let numH = 10;
+        let numH = 15;
 
         for(let miniStep = 0; miniStep < numH; miniStep++) {
             INTEGRATORS.integrateRungeKutta(this.clothState, dt / numH);
-            //INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+            // INTEGRATORS.integrateEuler(this.clothState, dt / numH);
         }
 
         for(let x = 0; x < this.width; x++) {
