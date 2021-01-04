@@ -3,7 +3,6 @@ import * as THREE from "/three/three.module.js";
 
 
 const AIR_RESISTANCE = 10;
-const WIND_MULTIPLIER = 3;
 
 var isInfiniteMass = [];
 
@@ -46,7 +45,7 @@ class ClothState {
         let deriv = new ClothDeriv(this.width, this.height);
         let windForce = new THREE.Vector3(0, 0, 0);
         if (this.cloth.options.wind) {
-            const windStrength = Math.cos( h * 7 ) * WIND_MULTIPLIER;
+            const windStrength = Math.cos( h * 7 ) * this.cloth.options.windForce;
 
             windForce.set( Math.sin( h / 20 ), Math.cos( h / 30), Math.sin( h / 10) );
             windForce.normalize();

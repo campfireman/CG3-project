@@ -19,7 +19,7 @@ import * as THREE from "/three/three.module.js";
  *  airresistance gui           Albert
  *  adaptive steps              Albert
  *  spring visualizing          Ture done
- *  wind + gui                  Ture
+ *  wind + gui                  Ture done
  */
 
 const CLOTH_SIZE = 20;
@@ -44,6 +44,7 @@ class ClothWindow extends Window {
 
             gravity: 2,
             wind: true,
+            windForce: 3,
 
             integrator: 1,
 
@@ -84,6 +85,7 @@ class ClothWindow extends Window {
         let envFolder = this.gui.addFolder("environment");
         envFolder.add(this.guiOptions, "gravity", 1, 100);
         envFolder.add(this.guiOptions, "wind");
+        envFolder.add(this.guiOptions, "windForce", 1, 5);
         envFolder.open();
         
         let generalFolder = this.gui.addFolder("general");
