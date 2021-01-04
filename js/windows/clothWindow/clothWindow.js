@@ -13,7 +13,7 @@ import * as THREE from "/three/three.module.js";
  *  controls (tuch anheben)     Albert done
  *  fixed points (gui)          Albert done
  *  triangle mesh (coloring)    Albert
- *  shear bend springs          Ture
+ *  shear bend springs          Ture done
  *  integrating                 Ture, Albert done
  *  intergrator switching       Ture done
  *  airresistance gui           Albert
