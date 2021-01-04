@@ -9,7 +9,7 @@ import {
   PerspectiveCamera,
   Scene,
   SphereGeometry,
-  Vector3,
+  Vector3
 } from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
 import { QuaternionAngle } from "./Quaternion.js";
@@ -484,6 +484,9 @@ class QuaternionWindow extends Window {
     let x = this.random();
     let y = this.random();
     let z = this.random();
+    if (x == 0 && y == 0 && z == 0) {
+      x = 0;
+    }
     let attributes = {
       folder: newQuaternionFolder,
       quaternion: new QuaternionAngle(DEFAULT_THETA_VALUE, x, y, z),
