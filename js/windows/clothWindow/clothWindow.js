@@ -18,7 +18,7 @@ import * as THREE from "/three/three.module.js";
  *  intergrator switching       Ture done
  *  airresistance gui           Albert
  *  adaptive steps              Albert
- *  spring visualizing          Ture
+ *  spring visualizing          Ture done
  *  wind + gui                  Ture
  */
 
