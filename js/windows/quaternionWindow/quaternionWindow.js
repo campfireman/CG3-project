@@ -490,7 +490,7 @@ class QuaternionWindow extends Window {
     let z = this.random();
 
     if (x == 0 && y == 0 && z == 0) {
-      x = 0;
+      x = 1;
     }
     
     let attributes = {
