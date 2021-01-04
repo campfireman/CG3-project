@@ -418,13 +418,17 @@ class QuaternionWindow extends Window {
       this.object.setRotationFromMatrix(pos.matrix);
 
       // update position in quaternion visualization
-      let new_pos = 0;
-      new_pos = this.project(
-        this.projectionPoint,
-        new Vector3(pos.x, pos.y, pos.z).sub(this.projectionPoint).normalize(),
-        this.sphereCenter,
-        this.sphereRadius
-      );
+      let new_pos = pos;
+
+      // only project interpolated points after the first couple
+      if (this.cur > 0) {
+        new_pos = this.project(
+          this.projectionPoint,
+          new Vector3(pos.x, pos.y, pos.z).sub(this.projectionPoint).normalize(),
+          this.sphereCenter,
+          this.sphereRadius
+        );
+      }
 
       this.pointer.position.set(new_pos.x, new_pos.y, new_pos.z);
       this.interpolationPath.push(new Vector3(new_pos.x, new_pos.y, new_pos.z));
