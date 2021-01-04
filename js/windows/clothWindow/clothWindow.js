@@ -43,7 +43,7 @@ class ClothWindow extends Window {
             fix_right_corner: true,
 
             gravity: 2,
-            integrator: 0,
+            integrator: 1,
         }
 
         this.gui = new DAT.GUI();

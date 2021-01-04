@@ -3,10 +3,10 @@ import * as INTEGRATORS from "./Intergrators.js";
 import { TransformControls } from '/jsm/controls/TransformControls.js';
 import * as THREE from "/three/three.module.js";
 
-/*const INTEGRATORS = [
-    integrateEuler,
-    integrateRungeKutta
-];*/
+const INTEGRATOR_LIST = [
+    INTEGRATORS.integrateEuler,
+    INTEGRATORS.integrateRungeKutta
+];
 
 const sphereGeometry = new THREE.SphereGeometry(0.03, 32, 32);
 const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
@@ -25,7 +25,7 @@ class Cloth {
         this.particles = [];
         this.selectionGroup = [];
 
-        this.integrator = INTEGRATORS[options.integrator];
+        this.integrator = INTEGRATOR_LIST[options.integrator];
 
         this.clothState = new ClothState(width, height, options);
 
@@ -110,8 +110,7 @@ class Cloth {
         let numH = 15;
 
         for(let miniStep = 0; miniStep < numH; miniStep++) {
-            INTEGRATORS.integrateRungeKutta(this.clothState, dt / numH);
-            // INTEGRATORS.integrateEuler(this.clothState, dt / numH);
+            this.integrator(this.clothState, dt / numH);
         }
 
         for(let x = 0; x < this.width; x++) {
@@ -153,12 +152,7 @@ class Cloth {
     }
 
     setIntegrator(index) {
-        this.integrator = INTEGRATORS[index];
-        for(let x = 0; x < this.width; x++) {
-            for(let y = 0; y < this.height; y++) {
-                this.particles[x][y].setIntegrator(this.integrator);
-            }
-        }
+        this.integrator = INTEGRATOR_LIST[index];
     }
 
 }
