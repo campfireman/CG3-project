@@ -38,13 +38,13 @@ class ClothWindow extends Window {
         this.guiOptions = {
             particle_distance: PARTICLE_DISTANCE,
             particle_mass: 1.5,
-            toughness: 800,
+            toughness: 1000,
 
             fix_left_corner: true,
             fix_right_corner: true,
 
-            gravity: 2,
-            air_resistance: 10,
+            gravity: 3,
+            air_resistance: 2,
             wind: true,
             windForce: 2,
 
