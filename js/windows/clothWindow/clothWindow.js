@@ -44,6 +44,12 @@ class ClothWindow extends Window {
 
             gravity: 2,
             integrator: 1,
+
+            showParticles: true,
+            showBasicSprings: false,
+            showShearSprings: false,
+            showBendSprings: false,
+
         }
 
         this.gui = new DAT.GUI();
@@ -85,6 +91,15 @@ class ClothWindow extends Window {
             this.cloth.setIntegrator(newIntegratorIndex);
         })
         generalFolder.open();
+
+        let visulizationFolder = this.gui.addFolder("visualization");
+        visulizationFolder.add(this.guiOptions, "showParticles")
+        visulizationFolder.add(this.guiOptions, "showBasicSprings")
+        visulizationFolder.add(this.guiOptions, "showShearSprings")
+        visulizationFolder.add(this.guiOptions, "showBendSprings")
+
+        visulizationFolder.open();
+
         this.scene = new THREE.Scene();
         this.scene.add(new THREE.GridHelper(50, 20));
 

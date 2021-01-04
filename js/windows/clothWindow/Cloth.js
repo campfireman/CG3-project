@@ -146,6 +146,7 @@ class Cloth {
                 this.particles[x][y].position.x = this.clothState.positions[x][y].x;
                 this.particles[x][y].position.y = this.clothState.positions[x][y].y;
                 this.particles[x][y].position.z = this.clothState.positions[x][y].z;
+                this.particles[x][y].visible = this.options.showParticles;
             }
         }
         this.springVisulization.update();

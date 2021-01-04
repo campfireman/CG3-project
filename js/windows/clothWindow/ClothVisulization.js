@@ -7,7 +7,6 @@ class ClothVisulization {
     constructor(cloth) {
         this.cloth = cloth
 
-        this.hidden = false;
         this.springs = [];
 
         for(let x = 0; x < this.cloth.width; x++) {
@@ -41,16 +40,7 @@ class ClothVisulization {
             }
         }
     }
-    hide() {
-        this.hidden = true;
-    }
-    show() {
-        this.hidden = false;
-    }
     update() {
-        if (this.hidden) {
-            return;
-        }
         for(let x = 0; x < this.cloth.width; x++) {
             for(let y = 0; y < this.cloth.height; y++) {
                 this.cloth.springs.forEach((val, i) => {
@@ -58,30 +48,42 @@ class ClothVisulization {
                     if (spring == null) {
                         return;
                     }
-                    spring.geometry.vertices.pop()
-                    spring.geometry.vertices.pop()
-                    let pos1 = this.cloth.particles[x][y].position;
-                    let pos2 = this.cloth.particles[spring.other.x][spring.other.y].position;
-                    let direction = pos1.clone().sub(pos2);
-                    spring.geometry.vertices.push(
-                        pos1, pos2,
+
+                    if (
+                        (i >= 0 && i < 4 && this.cloth.options.showBasicSprings) ||
+                        (i >= 4 && i < 8 && this.cloth.options.showShearSprings) ||
+                        (i >= 8 && i < 12 && this.cloth.options.showBendSprings)
                     )
-                    spring.geometry.verticesNeedUpdate = true;
-                    let scale = this.clamp(direction.length() / val.restingDistance, 0, 2);
-                    let color = COLOR_REST;
-                    if (scale > 1) {
-                        color = COLOR_STRETCHED;
-                        scale = 1 - (scale - 1);
-                    } else if (scale < 1) {
-                        color = COLOR_SQUEEZED;
+                    {
+                        spring.geometry.vertices.pop()
+                        spring.geometry.vertices.pop()
+                        let pos1 = this.cloth.particles[x][y].position;
+                        let pos2 = this.cloth.particles[spring.other.x][spring.other.y].position;
+                        let direction = pos1.clone().sub(pos2);
+                        spring.geometry.vertices.push(
+                            pos1, pos2,
+                        )
+                        spring.geometry.verticesNeedUpdate = true;
+                        let scale = this.clamp(direction.length() / val.restingDistance, 0, 2);
+                        let color = COLOR_REST;
+                        if (scale > 1) {
+                            color = COLOR_STRETCHED;
+                            scale = 1 - (scale - 1);
+                        } else if (scale < 1) {
+                            color = COLOR_SQUEEZED;
+                        }
+                        color = this.pSBC(scale, color, false, true);
+                        // exit if values go crazy
+                        if (color == '#') {
+                            return;
+                        }
+                        spring.line.material = new THREE.LineBasicMaterial({
+                            color: color,
+                        });
+                        spring.line.visible = true;
+                    } else {
+                        spring.line.visible = false;
                     }
-                    color = this.pSBC(scale, color, false, true);
-                    if (color == '#') {
-                        return;
-                    }
-                    spring.line.material = new THREE.LineBasicMaterial({
-                        color: color,
-                    })
                 });
             }
         }
