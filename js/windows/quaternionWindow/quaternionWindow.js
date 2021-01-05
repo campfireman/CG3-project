@@ -234,6 +234,7 @@ class QuaternionWindow extends Window {
         });
         delete this.interpolationPathLines;
         this.interpolationPathLines = [];
+        this.objectsToPurge = [];
     }
     /**
      * Angle based quaternions need to be updated if values changed
@@ -255,20 +256,9 @@ class QuaternionWindow extends Window {
     visualizeQuaternions() {
         // cleanup old visualiziation
         if (this.rotationAxisArrow != null) {
-            this.scene.remove(this.rotationAxisArrow);
-            delete this.rotationAxisArrow;
-            this.scene.remove(this.rotationArrowLine);
-            delete this.rotationArrowLine;
-            this.scene.remove(this.rotationArrowTip);
-            delete this.rotationArrowTip;
-            this.scene.remove(this.rotationStart);
-            delete this.rotationStart;
-            this.scene.remove(this.rotationEnd);
-            delete this.rotationEnd;
-            this.sphere.remove(this.interpolationStart);
-            delete this.interpolationStart;
-            this.sphere.remove(this.interpolationEnd);
-            delete this.interpolationEnd;
+            this.objectsToPurge.forEach((obj) => {
+                this.scene.remove(obj);
+            });
         }
         let current = this.quaternions[this.cur].quaternion;
         let origin = new Vector3(0, 0, 0);
@@ -401,6 +391,17 @@ class QuaternionWindow extends Window {
         this.scene.add(this.rotationArrowLine);
         this.scene.add(this.rotationArrowTip);
         this.scene.add(this.rotationAxisArrow);
+        this.scene.remove(this.rotationAxisArrow);
+
+        this.objectsToPurge.push(
+            this.rotationAxisArrow,
+            this.rotationArrowLine,
+            this.rotationArrowTip,
+            this.rotationStart,
+            this.rotationEnd,
+            this.interpolationStart,
+            this.interpolationEnd
+        );
     }
     /**
      * Animates the given object with the given quaternions, distributes time evenly quaternions
