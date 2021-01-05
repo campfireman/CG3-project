@@ -1,8 +1,10 @@
-import { ClothState, distance, initMassArray, setInfiniteMass } from "./ClothState.js";
 import * as INTEGRATORS from "./Intergrators.js";
+import { ClothState, distance, initMassArray, setInfiniteMass } from "./ClothState.js";
 import { ClothVisulization } from "./ClothVisulization.js";
-import { TransformControls } from "/jsm/controls/TransformControls.js";
+
 import * as THREE from "/three/three.module.js";
+
+import { TransformControls } from "/jsm/controls/TransformControls.js";
 
 const INTEGRATOR_LIST = [
     {
