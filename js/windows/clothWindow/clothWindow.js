@@ -1,10 +1,10 @@
+import { Window } from "../window.js";
+import { Cloth } from "./Cloth.js";
+
 import * as THREE from "/three/three.module.js";
 import * as DAT from "/dat/dat.gui.module.js";
 
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
-
-import { Window } from "../window.js";
-import { Cloth } from "./Cloth.js";
 
 /**
  * TODO
