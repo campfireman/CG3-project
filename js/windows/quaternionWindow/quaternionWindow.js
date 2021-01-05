@@ -1,14 +1,16 @@
 import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
-import { Window } from "../window.js";
 import { Label } from "./Label.js";
 import { QuaternionAngle } from "./Quaternion.js";
+import { Window } from "../window.js";
+
 import * as DAT from "/dat/dat.gui.module.js";
-import { OrbitControls } from "/jsm/controls/OrbitControls.js";
+import * as THREE from "/three/three.module.js";
+import { Vector3 } from "/three/three.module.js";
+
 import { Line2 } from "/jsm/lines/Line2.js";
 import { LineGeometry } from "/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "/jsm/lines/LineMaterial.js";
-import * as THREE from "/three/three.module.js";
-import { Vector3 } from "/three/three.module.js";
+import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
 const MODEL_PATH = "../../../models/";
 
