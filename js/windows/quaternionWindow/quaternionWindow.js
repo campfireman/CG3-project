@@ -1,23 +1,14 @@
-import { GUI } from "../../../libJs/dat.gui.module.js";
 import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
-import {
-    AmbientLight,
-    ArrowHelper,
-    GridHelper,
-    Mesh,
-    MeshPhongMaterial,
-    PerspectiveCamera,
-    Scene,
-    SphereGeometry,
-    Vector3,
-} from "../../../libJs/three.module.js";
 import { Window } from "../window.js";
 import { Label } from "./Label.js";
 import { QuaternionAngle } from "./Quaternion.js";
+import * as DAT from "/dat/dat.gui.module.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 import { Line2 } from "/jsm/lines/Line2.js";
 import { LineGeometry } from "/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "/jsm/lines/LineMaterial.js";
+import * as THREE from "/three/three.module.js";
+import { Vector3 } from "/three/three.module.js";
 
 const MODEL_PATH = "../../../models/";
 
@@ -87,14 +78,14 @@ class QuaternionWindow extends Window {
         };
 
         // scene
-        this.scene = new Scene();
+        this.scene = new THREE.Scene();
         const color = 0xffffff;
         const intensity = 1;
-        this.scene.add(new AmbientLight(color, intensity));
-        this.scene.add(new GridHelper(50, 20));
+        this.scene.add(new THREE.AmbientLight(color, intensity));
+        this.scene.add(new THREE.GridHelper(50, 20));
 
         // camera
-        this.camera = new PerspectiveCamera(
+        this.camera = new THREE.PerspectiveCamera(
             75,
             window.innerWidth / window.innerHeight,
             0.1,
@@ -128,30 +119,30 @@ class QuaternionWindow extends Window {
         this.sphereRadius = 1;
         this.sphereCenter = new Vector3(0, 0, 0);
         this.projectionPoint = new Vector3(0, 0, 0);
-        const sgeometry = new SphereGeometry(this.sphereRadius, 32, 32);
-        const smaterial = new MeshPhongMaterial({
+        const sgeometry = new THREE.SphereGeometry(this.sphereRadius, 32, 32);
+        const smaterial = new THREE.MeshPhongMaterial({
             color: 0xffffff,
             opacity: 0.5,
             transparent: true,
         });
-        this.sphere = new Mesh(sgeometry, smaterial);
+        this.sphere = new THREE.Mesh(sgeometry, smaterial);
         this.scene.add(this.sphere);
         this.sphere.translateX(2.5);
 
         let origin = new Vector3(0, 0, 0);
-        this.iAxis = new ArrowHelper(
+        this.iAxis = new THREE.ArrowHelper(
             new Vector3(1, 0, 0),
             origin,
             2,
             I_AXIS_COLOR
         );
-        this.jAxis = new ArrowHelper(
+        this.jAxis = new THREE.ArrowHelper(
             new Vector3(0, 1, 0),
             origin,
             2,
             J_AXIS_COLOR
         );
-        this.kAxis = new ArrowHelper(
+        this.kAxis = new THREE.ArrowHelper(
             new Vector3(0, 0, 1),
             origin,
             2,
@@ -173,7 +164,7 @@ class QuaternionWindow extends Window {
         this.interpolationPathLines = [];
 
         // GUI
-        this.gui = new GUI();
+        this.gui = new DAT.GUI();
 
         this.quaternionFolder = this.gui.addFolder("Quaternions");
         this.quaternionFolder.open();
@@ -210,17 +201,17 @@ class QuaternionWindow extends Window {
         this.rotationStart = null;
         this.rotationEnd = null;
         this.visualizeQuaternions();
-        const pointerGeometry = new SphereGeometry(
+        const pointerGeometry = new THREE.SphereGeometry(
             POINT_MARKER_RADIUS,
             POINT_SEGMENT_WIDTH,
             POINT_SEGMENT_HEIGHT
         );
         pointerGeometry.translate(this.curQ.x, this.curQ.y, this.curQ.z);
-        const pointerMaterial = new MeshPhongMaterial({
+        const pointerMaterial = new THREE.MeshPhongMaterial({
             color: 0xff0000,
             opacity: 1,
         });
-        this.pointer = new Mesh(pointerGeometry, pointerMaterial);
+        this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
         this.sphere.add(this.pointer);
     }
 
@@ -282,7 +273,7 @@ class QuaternionWindow extends Window {
         let rotationAxis = new Vector3()
             .copy(current.getRotationAxis())
             .applyMatrix4(this.curQ.matrix);
-        this.rotationAxisArrow = new ArrowHelper(
+        this.rotationAxisArrow = new THREE.ArrowHelper(
             rotationAxis,
             origin,
             rotationAxis.length(),
@@ -311,13 +302,13 @@ class QuaternionWindow extends Window {
         let end = new Vector3().copy(start);
         end.applyMatrix4(endQ.matrix);
         end.normalize();
-        this.rotationStart = new ArrowHelper(
+        this.rotationStart = new THREE.ArrowHelper(
             new Vector3(0, 0, 0).copy(start),
             new Vector3(0, 0, 0),
             start.length(),
             0x00ff00
         );
-        this.rotationEnd = new ArrowHelper(
+        this.rotationEnd = new THREE.ArrowHelper(
             new Vector3(0, 0, 0).copy(end),
             new Vector3(0, 0, 0),
             end.length(),
@@ -347,7 +338,7 @@ class QuaternionWindow extends Window {
         });
         this.rotationArrowLine = new Line2(geometry, material);
         let l = new Vector3(0, 0, 0).copy(end).sub(lastP).length();
-        this.rotationArrowTip = new ArrowHelper(
+        this.rotationArrowTip = new THREE.ArrowHelper(
             new Vector3(0, 0, 0).copy(end).sub(lastP).normalize(),
             lastP,
             l,
@@ -365,17 +356,20 @@ class QuaternionWindow extends Window {
             this.sphereCenter,
             this.sphereRadius
         );
-        const startPGeometry = new SphereGeometry(
+        const startPGeometry = new THREE.SphereGeometry(
             POINT_MARKER_RADIUS,
             POINT_SEGMENT_WIDTH,
             POINT_SEGMENT_HEIGHT
         );
         startPGeometry.translate(new_pos.x, new_pos.y, new_pos.z);
-        const startPMaterial = new MeshPhongMaterial({
+        const startPMaterial = new THREE.MeshPhongMaterial({
             color: 0x00ff00,
             opacity: 1,
         });
-        this.interpolationStart = new Mesh(startPGeometry, startPMaterial);
+        this.interpolationStart = new THREE.Mesh(
+            startPGeometry,
+            startPMaterial
+        );
 
         new_pos = this.project(
             this.projectionPoint,
@@ -385,17 +379,17 @@ class QuaternionWindow extends Window {
             this.sphereCenter,
             this.sphereRadius
         );
-        const endPGeometry = new SphereGeometry(
+        const endPGeometry = new THREE.SphereGeometry(
             POINT_MARKER_RADIUS,
             POINT_SEGMENT_WIDTH,
             POINT_SEGMENT_HEIGHT
         );
         endPGeometry.translate(new_pos.x, new_pos.y, new_pos.z);
-        const endPMaterial = new MeshPhongMaterial({
+        const endPMaterial = new THREE.MeshPhongMaterial({
             color: 0x0000ff,
             opacity: 1,
         });
-        this.interpolationEnd = new Mesh(endPGeometry, endPMaterial);
+        this.interpolationEnd = new THREE.Mesh(endPGeometry, endPMaterial);
 
         this.sphere.add(this.interpolationStart);
         this.sphere.add(this.interpolationEnd);

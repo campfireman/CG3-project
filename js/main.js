@@ -1,5 +1,3 @@
-//import { GUI } from "../../libJs/dat.gui.module.js";
-//import { TetrahedronGeometry, WebGLRenderer } from "../libJs/three.module.js";
 import { BezierWindow } from "./windows/bezierWindow/bezierWindow.js";
 import { QuaternionWindow } from "./windows/quaternionWindow/quaternionWindow.js";
 import * as DAT from "/dat/dat.gui.module.js";

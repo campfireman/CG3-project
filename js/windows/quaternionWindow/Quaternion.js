@@ -1,4 +1,4 @@
-import { Matrix4, Vector3 } from "../../../libJs/three.module.js";
+import { Matrix4, Vector3 } from "/three/three.module.js";
 /**
  * The fundamental way to represent a quaternion based on a real s and the complex components i, j and k
  * Has to be named QuaternionBase because of namespace conflicts with three.js
