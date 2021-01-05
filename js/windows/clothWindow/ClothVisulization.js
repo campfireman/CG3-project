@@ -152,9 +152,8 @@ class ClothVisulization {
                         }
                         color = this.lerp(color, COLOR_REST, scale);
 
-                        spring.line.material = new THREE.LineBasicMaterial({
-                            color: color,
-                        });
+                        spring.line.material.color = new THREE.Color(color);
+
                         spring.line.visible = true;
                     } else {
                         spring.line.visible = false;
