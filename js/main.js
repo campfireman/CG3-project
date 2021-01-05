@@ -10,23 +10,23 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 var windowInstances = [
-  new BezierWindow(renderer),
-  new QuaternionWindow(renderer),
+    new BezierWindow(renderer),
+    new QuaternionWindow(renderer),
 ];
 
 var windowIndecies = {
-  bezier: 0,
-  quaternion: 1,
+    bezier: 0,
+    quaternion: 1,
 };
 
 var globalOptions = {
-  window: 1,
+    window: 1,
 };
 
 var lastTme = 0;
 
 for (let i = 0; i < windowInstances.length; i++) {
-  windowInstances[i].getGUI().hide();
+    windowInstances[i].getGUI().hide();
 }
 
 var currentWindow = windowInstances[globalOptions.window];
@@ -36,25 +36,25 @@ var windowsSelectGui = new DAT.GUI({ autoPlace: false });
 
 var windowFolder = windowsSelectGui.addFolder("Current window");
 windowFolder
-  .add(globalOptions, "window", windowIndecies)
-  .onChange((newWindowIndex) => {
-    currentWindow.getGUI().hide();
+    .add(globalOptions, "window", windowIndecies)
+    .onChange((newWindowIndex) => {
+        currentWindow.getGUI().hide();
 
-    currentWindow = windowInstances[newWindowIndex];
+        currentWindow = windowInstances[newWindowIndex];
 
-    currentWindow.getGUI().show();
-  });
+        currentWindow.getGUI().show();
+    });
 windowFolder.open();
 document
-  .getElementById("window-control")
-  .appendChild(windowsSelectGui.domElement);
+    .getElementById("window-control")
+    .appendChild(windowsSelectGui.domElement);
 
 function animate(time) {
-  currentWindow.update(time - lastTme);
-  lastTme = time;
+    currentWindow.update(time - lastTme);
+    lastTme = time;
 
-  renderer.render(currentWindow.getScene(), currentWindow.getCamera());
+    renderer.render(currentWindow.getScene(), currentWindow.getCamera());
 
-  requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
 }
 requestAnimationFrame(animate);

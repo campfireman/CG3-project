@@ -1,12 +1,11 @@
-
 class Label {
     constructor(position, text, camera) {
         this.position = position;
         this.camera = camera;
 
-        var div = document.createElement('div');
-        div.className = 'text-label';
-        div.style.position = 'absolute';
+        var div = document.createElement("div");
+        div.className = "text-label";
+        div.style.position = "absolute";
         div.style.width = 100;
         div.style.height = 100;
         div.innerHTML = text;
@@ -18,15 +17,15 @@ class Label {
     }
     updatePosition() {
         let position = this.position.clone();
-        
+
         var coords2d = this.get2DCoords(position, this.camera);
-        this.element.style.left = coords2d.x + 'px';
-        this.element.style.top = coords2d.y + 'px';
+        this.element.style.left = coords2d.x + "px";
+        this.element.style.top = coords2d.y + "px";
     }
     get2DCoords(position, camera) {
         var vector = position.project(camera);
-        vector.x = (vector.x + 1)/2 * window.innerWidth;
-        vector.y = -(vector.y - 1)/2 * window.innerHeight;
+        vector.x = ((vector.x + 1) / 2) * window.innerWidth;
+        vector.y = (-(vector.y - 1) / 2) * window.innerHeight;
         return vector;
     }
 }
