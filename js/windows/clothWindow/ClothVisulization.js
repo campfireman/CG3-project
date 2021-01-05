@@ -4,6 +4,9 @@ const COLOR_REST = 0xffffff;
 const COLOR_STRETCHED = 0xff0000;
 const COLOR_SQUEEZED = 0x00ff00;
 
+const SPHERE_GEOMETRY = new THREE.SphereGeometry(0.06, 32, 32);
+const SPHERE_MATERIAL = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
+
 /**
  * Responsible for additional entities to visualize the state of the cloth
  */
@@ -12,7 +15,9 @@ class ClothVisulization {
         this.cloth = cloth;
 
         this.springs = [];
+        this.particles = [];
 
+        this.initParticles();
         this.initSprings();
         this.initMesh();
     }
@@ -30,7 +35,7 @@ class ClothVisulization {
                     let otherY = y + spring.y;
                     if (otherX >= 0 && otherX <= this.cloth.width - 1 && otherY >= 0 && otherY <= this.cloth.height - 1) {
                         let geometry = new THREE.Geometry();
-                        geometry.vertices.push(this.cloth.particles[x][y].position, this.cloth.particles[otherX][otherY].position);
+                        geometry.vertices.push(this.particles[x][y].position, this.particles[otherX][otherY].position);
 
                         let line = new THREE.Line(
                             geometry,
@@ -117,18 +122,45 @@ class ClothVisulization {
 
         this.updateMesh();
     }
+
+    initParticles() {
+        for (let x = 0; x < this.cloth.width; x++) {
+            this.particles.push([]);
+            for (let y = 0; y < this.cloth.height; y++) {
+                let partPos = this.cloth.pos
+                    .clone()
+                    .add(new THREE.Vector3(x * this.cloth.options.particle_distance, y * this.cloth.options.particle_distance, (y * this.cloth.options.particle_distance) / 2));
+
+                let sphere = new THREE.Mesh(SPHERE_GEOMETRY, SPHERE_MATERIAL);
+                sphere.position.x = partPos.x;
+                sphere.position.y = partPos.y;
+                sphere.position.z = partPos.z;
+                sphere.clothPosX = x;
+                sphere.clothPosY = y;
+                this.cloth.scene.add(sphere);
+
+                this.particles[x].push(sphere);
+                this.cloth.clothState.positions[x][y] = partPos.clone();
+
+                //this.selectionGroup.push(sphere);
+            }
+        }
+    }
+
     /**
      * Entry point that is called each frame
      */
     update() {
         this.updateSprings();
-
+        this.updateParticlesPositions();
         if (this.cloth.options.show_mesh) {
             this.mesh.visible = true;
             this.updateMesh();
         } else {
             this.mesh.visible = false;
         }
+
+        
     }
 
     /**
@@ -197,6 +229,17 @@ class ClothVisulization {
         this.mesh.geometry.computeVertexNormals();
 
         this.mesh.geometry.attributes.position.needsUpdate = true;
+    }
+
+    updateParticlesPositions() {
+        for (let x = 0; x < this.cloth.width; x++) {
+            for (let y = 0; y < this.cloth.height; y++) {
+                this.particles[x][y].position.x = this.cloth.clothState.positions[x][y].x;
+                this.particles[x][y].position.y = this.cloth.clothState.positions[x][y].y;
+                this.particles[x][y].position.z = this.cloth.clothState.positions[x][y].z;
+                this.particles[x][y].visible = this.cloth.options.showParticles;
+            }
+        }
     }
 
     /**

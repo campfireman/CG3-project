@@ -17,48 +17,23 @@ const INTEGRATOR_LIST = [
     },
 ];
 
-const SPHERE_GEOMETRY = new THREE.SphereGeometry(0.06, 32, 32);
-const SPHERE_MATERIAL = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
-
 class Cloth {
     constructor(scene, camera, renderer, orbitControl, options, generalGui, width, height, pos, partDistance, partMass) {
         this.options = options;
         this.generalGui = generalGui;
         this.width = width;
         this.height = height;
+        this.pos = pos;
         this.scene = scene;
 
         this.partDistance = partDistance;
         this.partMass = partMass;
 
-        this.particles = [];
         this.selectionGroup = [];
 
         this.integrator = INTEGRATOR_LIST[options.integrator];
 
         this.clothState = new ClothState(this);
-
-        for (let x = 0; x < width; x++) {
-            this.particles.push([]);
-            for (let y = 0; y < height; y++) {
-                let partPos = pos
-                    .clone()
-                    .add(new THREE.Vector3(x * partDistance, y * partDistance, (y * partDistance) / 2));
-
-                let sphere = new THREE.Mesh(SPHERE_GEOMETRY, SPHERE_MATERIAL);
-                sphere.position.x = partPos.x;
-                sphere.position.y = partPos.y;
-                sphere.position.z = partPos.z;
-                sphere.clothPosX = x;
-                sphere.clothPosY = y;
-                scene.add(sphere);
-
-                this.particles[x].push(sphere);
-                this.clothState.positions[x][y] = partPos.clone();
-
-                this.selectionGroup.push(sphere);
-            }
-        }
 
         initMassArray(width, height);
 
@@ -89,6 +64,13 @@ class Cloth {
 
         // cloth visulization
         this.clothVisualization = new ClothVisulization(this);
+
+        let particles = this.clothVisualization.particles;
+        for(let i = 0; i < particles.length; i++) {
+            for(let j = 0; j < particles[i].length; j++) {
+                this.selectionGroup.push(particles[i][j]);
+            }
+        }
     }
 
     initControls(scene, camera, renderer, orbitControl) {
@@ -186,15 +168,6 @@ class Cloth {
 
         for (let i in this.generalGui.__controllers) {
             this.generalGui.__controllers[i].updateDisplay();
-        }
-
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                this.particles[x][y].position.x = this.clothState.positions[x][y].x;
-                this.particles[x][y].position.y = this.clothState.positions[x][y].y;
-                this.particles[x][y].position.z = this.clothState.positions[x][y].z;
-                this.particles[x][y].visible = this.options.showParticles;
-            }
         }
 
         this.clothVisualization.update();
