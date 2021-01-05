@@ -51,6 +51,7 @@ windowFolder
 
         currentWindow.show();
     });
+    
 windowFolder.open();
 document
     .getElementById("window-control")

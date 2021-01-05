@@ -131,7 +131,8 @@ class ClothVisulization {
                     .clone()
                     .add(new THREE.Vector3(x * this.cloth.options.particle_distance, y * this.cloth.options.particle_distance, (y * this.cloth.options.particle_distance) / 2));
 
-                let sphere = new THREE.Mesh(SPHERE_GEOMETRY, SPHERE_MATERIAL);
+                let mat = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
+                let sphere = new THREE.Mesh(SPHERE_GEOMETRY, mat);
                 sphere.position.x = partPos.x;
                 sphere.position.y = partPos.y;
                 sphere.position.z = partPos.z;
@@ -142,7 +143,6 @@ class ClothVisulization {
                 this.particles[x].push(sphere);
                 this.cloth.clothState.positions[x][y] = partPos.clone();
 
-                //this.selectionGroup.push(sphere);
             }
         }
     }
@@ -159,7 +159,9 @@ class ClothVisulization {
         } else {
             this.mesh.visible = false;
         }
-
+        if(this.cloth.options.show_mesh) {
+            this.updateParticleColors();
+        }
         
     }
 
@@ -238,6 +240,16 @@ class ClothVisulization {
                 this.particles[x][y].position.y = this.cloth.clothState.positions[x][y].y;
                 this.particles[x][y].position.z = this.cloth.clothState.positions[x][y].z;
                 this.particles[x][y].visible = this.cloth.options.showParticles;
+            }
+        }
+    }
+
+    updateParticleColors() {
+        let deriv = this.cloth.clothState.getDeriv(1);
+        for (let x = 0; x < this.cloth.width; x++) {
+            for (let y = 0; y < this.cloth.height; y++) {
+                let len = deriv.dVel[x][y].length();
+                this.particles[x][y].material.color.setRGB(len / 10, 0, 0);
             }
         }
     }
