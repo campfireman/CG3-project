@@ -79,6 +79,15 @@ class QuaternionWindow extends Window {
             },
         };
 
+        // init
+        this.init();
+        this.initObjects();
+        this.initGUI();
+        this.initAnimation();
+        this.initQuaternionVisualization();
+    }
+
+    init() {
         // scene
         this.scene = new THREE.Scene();
         const color = 0xffffff;
@@ -99,8 +108,9 @@ class QuaternionWindow extends Window {
             this.renderer.domElement
         );
         this.orbitControls.update();
+    }
 
-        // objects
+    initObjects() {
         this.object = null;
         var loader = new GLTFLoader();
         loader.load(
@@ -115,8 +125,54 @@ class QuaternionWindow extends Window {
                 console.error(error);
             }
         );
+    }
 
+    initGUI() {
+        this.gui = new DAT.GUI();
+
+        this.quaternionFolder = this.gui.addFolder("Quaternions");
+        this.quaternionFolder.open();
+
+        this.quaternionFolder
+            .add(this.options, "addQuaternion")
+            .name("Add quaternion");
+        this.quaternionFolder
+            .add(this.options, "removeQuaternion")
+            .name("Remove quaternion");
+
+        this.addQuaternion();
+
+        this.animationFolder = this.gui.addFolder("Animation");
+        this.animationFolder
+            .add(this.options, "toggleAnimation")
+            .name("Start/Stop");
+        this.animationFolder
+            .add(
+                this.options,
+                "animationTime",
+                MIN_ANIMATION_TIME,
+                MAX_ANIMATION_TIME
+            )
+            .name("Animation time")
+            .listen();
+        this.animationFolder.open();
+    }
+
+    initAnimation() {
+        // animation
+        this.startQ = new QuaternionAngle(0, 0, 0, 0);
+        this.interpolationPathLines = [];
+        this.resetAnimation();
+    }
+
+    initQuaternionVisualization() {
         this.interpolationPath = [];
+        this.rotationAxisArrow = null;
+        this.rotationArrowLine = null;
+        this.rotationArrowTip = null;
+        this.rotationStart = null;
+        this.rotationEnd = null;
+        this.objectsToPurge = [];
 
         this.sphereRadius = 1;
         this.sphereCenter = new Vector3(0, 0, 0);
@@ -159,50 +215,6 @@ class QuaternionWindow extends Window {
             new Label(new Vector3(2.5, 0, 2), "k", this.camera)
         );
 
-        this.sphere.add(this.iAxis);
-        this.sphere.add(this.jAxis);
-        this.sphere.add(this.kAxis);
-
-        this.interpolationPathLines = [];
-
-        // GUI
-        this.gui = new DAT.GUI();
-
-        this.quaternionFolder = this.gui.addFolder("Quaternions");
-        this.quaternionFolder.open();
-
-        this.quaternionFolder
-            .add(this.options, "addQuaternion")
-            .name("Add quaternion");
-        this.quaternionFolder
-            .add(this.options, "removeQuaternion")
-            .name("Remove quaternion");
-
-        this.addQuaternion();
-        this.animationFolder = this.gui.addFolder("Animation");
-        this.animationFolder
-            .add(this.options, "toggleAnimation")
-            .name("Start/Stop");
-        this.animationFolder
-            .add(
-                this.options,
-                "animationTime",
-                MIN_ANIMATION_TIME,
-                MAX_ANIMATION_TIME
-            )
-            .name("Animation time")
-            .listen();
-        this.animationFolder.open();
-
-        // animation
-        this.startQ = new QuaternionAngle(0, 0, 0, 0);
-        this.resetAnimation();
-        this.rotationAxisArrow = null;
-        this.rotationArrowLine = null;
-        this.rotationArrowTip = null;
-        this.rotationStart = null;
-        this.rotationEnd = null;
-        this.visualizeQuaternions();
         const pointerGeometry = new THREE.SphereGeometry(
             POINT_MARKER_RADIUS,
             POINT_SEGMENT_WIDTH,
@@ -215,6 +227,12 @@ class QuaternionWindow extends Window {
         });
         this.pointer = new THREE.Mesh(pointerGeometry, pointerMaterial);
         this.sphere.add(this.pointer);
+
+        this.sphere.add(this.iAxis);
+        this.sphere.add(this.jAxis);
+        this.sphere.add(this.kAxis);
+
+        this.visualizeQuaternions();
     }
 
     /**
@@ -234,7 +252,6 @@ class QuaternionWindow extends Window {
         });
         delete this.interpolationPathLines;
         this.interpolationPathLines = [];
-        this.objectsToPurge = [];
     }
     /**
      * Angle based quaternions need to be updated if values changed
@@ -258,7 +275,10 @@ class QuaternionWindow extends Window {
         if (this.rotationAxisArrow != null) {
             this.objectsToPurge.forEach((obj) => {
                 this.scene.remove(obj);
+                console.log(obj);
             });
+            this.sphere.remove(this.interpolationStart);
+            this.sphere.remove(this.interpolationEnd);
         }
         let current = this.quaternions[this.cur].quaternion;
         let origin = new Vector3(0, 0, 0);
@@ -398,9 +418,7 @@ class QuaternionWindow extends Window {
             this.rotationArrowLine,
             this.rotationArrowTip,
             this.rotationStart,
-            this.rotationEnd,
-            this.interpolationStart,
-            this.interpolationEnd
+            this.rotationEnd
         );
     }
     /**
