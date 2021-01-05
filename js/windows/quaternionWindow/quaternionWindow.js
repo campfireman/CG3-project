@@ -1,4 +1,3 @@
-import { GLTFLoader } from "../../../libJs/GLTFLoader.js";
 import { Label } from "./Label.js";
 import { QuaternionAngle } from "./Quaternion.js";
 import { Window } from "../window.js";
@@ -10,6 +9,7 @@ import { Vector3 } from "/three/three.module.js";
 import { Line2 } from "/jsm/lines/Line2.js";
 import { LineGeometry } from "/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "/jsm/lines/LineMaterial.js";
+import { GLTFLoader } from "/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
 const MODEL_PATH = "../../../assets/models/";
