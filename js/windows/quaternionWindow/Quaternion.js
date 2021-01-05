@@ -4,11 +4,18 @@ import { Matrix4, Vector3 } from "/three/three.module.js";
  * Has to be named QuaternionBase because of namespace conflicts with three.js
  */
 class QuaternionBase {
-    constructor(s, x, y, z) {
+    /**
+     *
+     * @param {Number} s the real part
+     * @param {Number} i x component of the "vector"
+     * @param {Number} j y component of the "vector"
+     * @param {Number} k z component of the "vector"
+     */
+    constructor(s, i, j, k) {
         this.s = s;
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this.x = i;
+        this.y = j;
+        this.z = k;
         this.matrix = new Matrix4();
         this.updateMatrix();
     }
@@ -35,12 +42,18 @@ class QuaternionBase {
             1
         );
     }
+    /**
+     * Converts the internal representation into the corresponding rotation axis
+     */
     getRotationAxis() {
         let theta_2 = Math.acos(this.s);
         let a_inv = Math.sin(theta_2);
         this.theta = theta_2 * 2;
         return new Vector3(this.x / a_inv, this.y / a_inv, this.z / a_inv);
     }
+    /**
+     *  Converts the internal representation into the corresponding theta
+     */
     getTheta() {
         Math.acos(this.s) * 2;
     }
@@ -48,63 +61,34 @@ class QuaternionBase {
         return this.multiplyScalar(1 / this.norm());
     }
     add(other) {
-        return new QuaternionBase(
-            this.s + other.s,
-            this.x + other.x,
-            this.y + other.y,
-            this.z + other.z
-        );
+        return new QuaternionBase(this.s + other.s, this.x + other.x, this.y + other.y, this.z + other.z);
     }
     dot(other) {
-        return (
-            this.s * other.s +
-            this.x * other.x +
-            this.y * other.y +
-            this.z * other.z
-        );
+        return this.s * other.s + this.x * other.x + this.y * other.y + this.z * other.z;
     }
     multiply(other) {
         let s1 = this.s;
         let s2 = other.s;
         let v1 = new Vector3(this.x, this.y, this.z);
         let v2 = new Vector3(other.x, other.y, other.z);
-        let res = v2
-            .clone()
-            .multiplyScalar(s1)
-            .add(v1.clone().multiplyScalar(s2))
-            .add(v1.clone().cross(v2.clone()));
+        let res = v2.clone().multiplyScalar(s1).add(v1.clone().multiplyScalar(s2)).add(v1.clone().cross(v2.clone()));
         return new QuaternionBase(s1 * s2 - v1.dot(v2), res.x, res.y, res.z);
     }
     multiplyScalar(scalar) {
-        return new QuaternionBase(
-            this.s * scalar,
-            this.x * scalar,
-            this.y * scalar,
-            this.z * scalar
-        );
+        return new QuaternionBase(this.s * scalar, this.x * scalar, this.y * scalar, this.z * scalar);
     }
     norm() {
         let res = new Vector3(this.x, this.y, this.z);
         return Math.sqrt(Math.pow(this.s, 2) + res.dot(res.clone()));
     }
     invert() {
-        return new QuaternionBase(
-            this.s,
-            -this.x,
-            -this.y,
-            -this.z
-        ).multiplyScalar(1 / Math.pow(this.norm(), 2));
+        return new QuaternionBase(this.s, -this.x, -this.y, -this.z).multiplyScalar(1 / Math.pow(this.norm(), 2));
     }
     negate() {
         return new QuaternionBase(-this.s, -this.x, -this.y, -this.z);
     }
     magnitude() {
-        return (
-            Math.pow(this.s, 2) +
-            Math.pow(this.x, 2) +
-            Math.pow(this.y, 2) +
-            Math.pow(this.z, 2)
-        );
+        return Math.pow(this.s, 2) + Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2);
     }
     /**
      *

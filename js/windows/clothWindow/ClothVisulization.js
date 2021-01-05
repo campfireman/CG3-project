@@ -4,6 +4,9 @@ const COLOR_REST = 0xffffff;
 const COLOR_STRETCHED = 0xff0000;
 const COLOR_SQUEEZED = 0x00ff00;
 
+/**
+ * Responsible for additional entities to visualize the state of the cloth
+ */
 class ClothVisulization {
     constructor(cloth) {
         this.cloth = cloth;
@@ -14,6 +17,9 @@ class ClothVisulization {
         this.initMesh();
     }
 
+    /**
+     * Initializes array necessary to visualize the springs
+     */
     initSprings() {
         for (let x = 0; x < this.cloth.width; x++) {
             this.springs.push([]);
@@ -47,6 +53,9 @@ class ClothVisulization {
         }
     }
 
+    /**
+     * Initializes the triangle mesh of the cloth and loads texture for it
+     */
     initMesh() {
         this.meshVertecies = [];
         this.meshIndecies = [];
@@ -108,7 +117,9 @@ class ClothVisulization {
 
         this.updateMesh();
     }
-
+    /**
+     * Entry point that is called each frame
+     */
     update() {
         this.updateSprings();
 
@@ -120,6 +131,10 @@ class ClothVisulization {
         }
     }
 
+    /**
+     * Updates all springs to the new position of the particles
+     * and colorizes them in accordance to the degree they are stretched or squeezed
+     */
     updateSprings() {
         for (let x = 0; x < this.cloth.width; x++) {
             for (let y = 0; y < this.cloth.height; y++) {
@@ -129,6 +144,7 @@ class ClothVisulization {
                         return;
                     }
 
+                    // checks based on the index the type of the spring and whether to display this type
                     if (
                         (i >= 0 && i < 4 && this.cloth.options.showBasicSprings) ||
                         (i >= 4 && i < 8 && this.cloth.options.showShearSprings) ||
@@ -142,7 +158,9 @@ class ClothVisulization {
                         spring.geometry.vertices[1] = pos2;
 
                         spring.geometry.verticesNeedUpdate = true;
+                        // clamp as sping might be extremely overstreched, hence larger than 2
                         let scale = this.clamp(direction.length() / val.restingDistance, 0, 2);
+
                         let color = COLOR_REST;
                         if (scale > 1) {
                             color = COLOR_STRETCHED;
@@ -150,10 +168,9 @@ class ClothVisulization {
                         } else if (scale < 1) {
                             color = COLOR_SQUEEZED;
                         }
+
                         color = this.lerp(color, COLOR_REST, scale);
-
                         spring.line.material.color = new THREE.Color(color);
-
                         spring.line.visible = true;
                     } else {
                         spring.line.visible = false;
@@ -163,6 +180,9 @@ class ClothVisulization {
         }
     }
 
+    /**
+     * Updates the vertices of the triangle mesh to the new positions of the particles
+     */
     updateMesh() {
         let vertecies = this.mesh.geometry.attributes.position.array;
 
@@ -179,6 +199,12 @@ class ClothVisulization {
         this.mesh.geometry.attributes.position.needsUpdate = true;
     }
 
+    /**
+     *
+     * @param {Number} value Value to clamp
+     * @param {Number} min lowest possible value
+     * @param {Number} max highest possible value
+     */
     clamp(value, min, max) {
         if (value > max) {
             return max;

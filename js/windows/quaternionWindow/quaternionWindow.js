@@ -38,6 +38,9 @@ const I_AXIS_COLOR = 0xffffff;
 const J_AXIS_COLOR = 0xffffff;
 const K_AXIS_COLOR = 0xffffff;
 
+/**
+ * Displays the scenery for the interpolation and visualization of quaternions
+ */
 class QuaternionWindow extends Window {
     constructor(renderer) {
         super(renderer);
@@ -84,7 +87,9 @@ class QuaternionWindow extends Window {
         this.initAnimation();
         this.initQuaternionVisualization();
     }
-
+    /**
+     * Basic initializations
+     */
     init() {
         // scene
         this.scene = new THREE.Scene();
@@ -99,7 +104,9 @@ class QuaternionWindow extends Window {
         this.orbitControls = new OrbitControls(this.camera, this.renderer.domElement);
         this.orbitControls.update();
     }
-
+    /**
+     * Initializes the main object of the scene
+     */
     initObjects() {
         this.object = null;
         var loader = new GLTFLoader();
@@ -116,7 +123,9 @@ class QuaternionWindow extends Window {
             }
         );
     }
-
+    /**
+     * Initializes the GUI structure
+     */
     initGUI() {
         this.gui = new DAT.GUI();
 
@@ -133,14 +142,18 @@ class QuaternionWindow extends Window {
         this.animationFolder.add(this.options, "animationTime", MIN_ANIMATION_TIME, MAX_ANIMATION_TIME).name("Animation time").listen();
         this.animationFolder.open();
     }
-
+    /**
+     * Initializes the variables for the animation
+     */
     initAnimation() {
         // animation
         this.startQ = new QuaternionAngle(0, 0, 0, 0);
         this.interpolationPathLines = [];
         this.resetAnimation();
     }
-
+    /**
+     * Initializes all objects for visualizing the quaternions
+     */
     initQuaternionVisualization() {
         this.interpolationPath = [];
         this.rotationAxisArrow = null;
@@ -391,13 +404,26 @@ class QuaternionWindow extends Window {
             }
         }
     }
+    /**
+     * Returns random scalar within the QUATERNION_RAND_INTERVAL
+     */
     random() {
         return Math.floor(Math.random() * QUATERNION_RAND_INTERVAL) - QUATERNION_RAND_INTERVAL / 2;
     }
+    /**
+     * Current length of the list of quaternions
+     */
     count() {
         return this.quaternions.length;
     }
-
+    /**
+     * Projects point onto the other shell of a sphere
+     *
+     * @param {THREE.Vector3} O origin of the ray
+     * @param {THREE.Vector3} D direction of the ray
+     * @param {THREE.Vector3} C center of the sphere
+     * @param {Number} radius of the sphere
+     */
     project(O, D, C, radius) {
         let L = new Vector3(0, 0, 0).copy(C).sub(O);
         let t_ca = L.dot(D);
@@ -465,14 +491,12 @@ class QuaternionWindow extends Window {
     getGUI() {
         return this.gui;
     }
-
     hide() {
         super.hide();
         this.sphereAxisLabels.forEach((label) => {
             label.hide();
         });
     }
-
     show() {
         super.show();
         this.sphereAxisLabels.forEach((label) => {
