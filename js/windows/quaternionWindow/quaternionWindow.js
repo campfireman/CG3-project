@@ -12,7 +12,7 @@ import { LineMaterial } from "/jsm/lines/LineMaterial.js";
 import { GLTFLoader } from "/jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
-const MODEL_PATH = "../../../assets/models/";
+const MODEL_PATH = "/assets/models/";
 
 const MIN_AXIS_VALUE = -10.0;
 const MIN_THETA_VALUE = 0.0;
