@@ -18,6 +18,14 @@ class Window {
     update(delta_t) {
         throw new TypeError("Must override method");
     }
+
+    hide() {
+        this.getGUI().hide();
+    }
+
+    show() {
+        this.getGUI().show();
+    }
 }
 
 export { Window };

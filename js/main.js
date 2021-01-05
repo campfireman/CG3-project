@@ -25,11 +25,11 @@ var globalOptions = {
 var lastTme = 0;
 
 for (let i = 0; i < windowInstances.length; i++) {
-    windowInstances[i].getGUI().hide();
+    windowInstances[i].hide();
 }
 
 var currentWindow = windowInstances[globalOptions.window];
-currentWindow.getGUI().show();
+currentWindow.show();
 
 var windowsSelectGui = new DAT.GUI({ autoPlace: false });
 
@@ -37,11 +37,11 @@ var windowFolder = windowsSelectGui.addFolder("Current window");
 windowFolder
     .add(globalOptions, "window", windowIndecies)
     .onChange((newWindowIndex) => {
-        currentWindow.getGUI().hide();
+        currentWindow.hide();
 
         currentWindow = windowInstances[newWindowIndex];
 
-        currentWindow.getGUI().show();
+        currentWindow.show();
     });
 windowFolder.open();
 document

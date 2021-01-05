@@ -28,6 +28,12 @@ class Label {
         vector.y = (-(vector.y - 1) / 2) * window.innerHeight;
         return vector;
     }
+    hide() {
+        this.element.style.display = "none";
+    }
+    show() {
+        this.element.style.display = "block";
+    }
 }
 
 export { Label };

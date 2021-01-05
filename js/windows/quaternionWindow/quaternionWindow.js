@@ -618,6 +618,20 @@ class QuaternionWindow extends Window {
     getGUI() {
         return this.gui;
     }
+
+    hide() {
+        super.hide();
+        this.sphereAxisLabels.forEach((label) => {
+            label.hide();
+        });
+    }
+
+    show() {
+        super.show();
+        this.sphereAxisLabels.forEach((label) => {
+            label.show();
+        });
+    }
 }
 
 export { QuaternionWindow };
