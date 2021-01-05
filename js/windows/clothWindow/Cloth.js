@@ -19,7 +19,7 @@ const SPHERE_GEOMETRY = new THREE.SphereGeometry(0.06, 32, 32);
 const SPHERE_MATERIAL = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 class Cloth {
-    constructor(scene, camera, renderer, orbitControl, options, generalGui, width, height, pos, partDistance, partMass, toughness) {
+    constructor(scene, camera, renderer, orbitControl, options, generalGui, width, height, pos, partDistance, partMass) {
         this.options = options;
         this.generalGui = generalGui;
         this.width = width;
