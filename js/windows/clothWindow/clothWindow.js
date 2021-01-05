@@ -6,22 +6,6 @@ import * as DAT from "/dat/dat.gui.module.js";
 
 import { OrbitControls } from "/jsm/controls/OrbitControls.js";
 
-/**
- * TODO
- *  licht                       Ture done
- *  gui                         Albert done
- *  controls (tuch anheben)     Albert done
- *  fixed points (gui)          Albert done
- *  triangle mesh (coloring)    Albert done
- *  shear bend springs          Ture done
- *  integrating                 Ture, Albert done
- *  intergrator switching       Ture done
- *  airresistance gui           Albert done
- *  adaptive steps              Albert done
- *  spring visualizing          Ture done
- *  wind + gui                  Ture done
- */
-
 const CLOTH_SIZE = 20;
 const CLOTH_TO_FLOOR_DISTANCE = 0.5;
 const PARTICLE_DISTANCE = 0.1;
