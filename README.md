@@ -22,7 +22,7 @@ Projekt aufrufen unter: http://localhost:8080
 
 Rotation von Objekt durch Interpolation zwischen vom Nutzer definierten Quaternionen.
 
-### Hinweise
+Hinweise:
 
 - Die Eingabemaske fuer die Quaternionen erwartet eine Rotationsachse {x, y, z} ∈ [0, 10], die dann normiert wird und einen Rotationswinkel Θ ∈ [0, 2π].
 - Die aktuelle Rotationsachse wird in Blau angezeigt, Startorientierung in der Rotationsebene in gruen und die Endorierntierung in der Rotationsebene in blau. Der Rotationswinkel Θ wird durch den roten Pfeil indiziert.
