@@ -15,8 +15,8 @@ const INTEGRATOR_LIST = [
     },
 ];
 
-const sphereGeometry = new THREE.SphereGeometry(0.06, 32, 32);
-const sphereMaterial = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
+const SPHERE_GEOMETRY = new THREE.SphereGeometry(0.06, 32, 32);
+const SPHERE_MATERIAL = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
 
 class Cloth {
     constructor(scene, camera, renderer, orbitControl, options, generalGui, width, height, pos, partDistance, partMass, toughness) {
@@ -43,7 +43,7 @@ class Cloth {
                     .clone()
                     .add(new THREE.Vector3(x * partDistance, y * partDistance, (y * partDistance) / 2 /*Math.random() / 1000 - 0.001*/));
 
-                let sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+                let sphere = new THREE.Mesh(SPHERE_GEOMETRY, SPHERE_MATERIAL);
                 sphere.position.x = partPos.x;
                 sphere.position.y = partPos.y;
                 sphere.position.z = partPos.z;
