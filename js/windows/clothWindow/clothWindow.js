@@ -59,7 +59,7 @@ class ClothWindow extends Window {
             showParticles: false,
             showBasicSprings: false,
             showShearSprings: false,
-            showBendSprings: false
+            showBendSprings: false,
         };
 
         this.gui = new DAT.GUI();
@@ -68,22 +68,20 @@ class ClothWindow extends Window {
         clothFolder.add(this.guiOptions, "particle_mass", 0.1, 10).step(0.001);
         clothFolder.add(this.guiOptions, "toughness", 1, 10000).step(0.001);
 
-        clothFolder.add(this.guiOptions, "fix_left_corner")
-        .onChange((leftCornerFixed) => {
-            if(leftCornerFixed) {
-                this.cloth.setParticlePos(0, CLOTH_SIZE-1, this.getLeftCornerPos());
-                this.cloth.setAnchorParticle(0, CLOTH_SIZE-1);
+        clothFolder.add(this.guiOptions, "fix_left_corner").onChange((leftCornerFixed) => {
+            if (leftCornerFixed) {
+                this.cloth.setParticlePos(0, CLOTH_SIZE - 1, this.getLeftCornerPos());
+                this.cloth.setAnchorParticle(0, CLOTH_SIZE - 1);
             } else {
-                this.cloth.unsetAnchorParticle(0, CLOTH_SIZE-1);
+                this.cloth.unsetAnchorParticle(0, CLOTH_SIZE - 1);
             }
         });
-        clothFolder.add(this.guiOptions, "fix_right_corner")
-        .onChange((rightCornerFixed) => {
-            if(rightCornerFixed) {
-                this.cloth.setParticlePos(CLOTH_SIZE-1, CLOTH_SIZE-1, this.getRightCornerPos());
-                this.cloth.setAnchorParticle(CLOTH_SIZE-1, CLOTH_SIZE-1);
+        clothFolder.add(this.guiOptions, "fix_right_corner").onChange((rightCornerFixed) => {
+            if (rightCornerFixed) {
+                this.cloth.setParticlePos(CLOTH_SIZE - 1, CLOTH_SIZE - 1, this.getRightCornerPos());
+                this.cloth.setAnchorParticle(CLOTH_SIZE - 1, CLOTH_SIZE - 1);
             } else {
-                this.cloth.unsetAnchorParticle(CLOTH_SIZE-1, CLOTH_SIZE-1);
+                this.cloth.unsetAnchorParticle(CLOTH_SIZE - 1, CLOTH_SIZE - 1);
             }
         });
         clothFolder.open();
@@ -94,14 +92,16 @@ class ClothWindow extends Window {
         envFolder.add(this.guiOptions, "wind");
         envFolder.add(this.guiOptions, "windForce", 1, 5);
         envFolder.open();
-        
+
         let generalFolder = this.gui.addFolder("general");
-        generalFolder.add(this.guiOptions, "integrator", {
-            euler: 0,
-            runge_kutta: 1,
-        }).onChange((newIntegratorIndex) => {
-            this.cloth.setIntegrator(newIntegratorIndex);
-        });
+        generalFolder
+            .add(this.guiOptions, "integrator", {
+                euler: 0,
+                runge_kutta: 1,
+            })
+            .onChange((newIntegratorIndex) => {
+                this.cloth.setIntegrator(newIntegratorIndex);
+            });
         generalFolder.add(this.guiOptions, "adaptive_step_size");
         generalFolder.add(this.guiOptions, "max_error", 0.0001, 1).step(0.0001);
         generalFolder.add(this.guiOptions, "max_steps_per_frame", 3, 50);
@@ -110,11 +110,11 @@ class ClothWindow extends Window {
         generalFolder.open();
 
         let visulizationFolder = this.gui.addFolder("visualization");
-        visulizationFolder.add(this.guiOptions, "show_mesh")
-        visulizationFolder.add(this.guiOptions, "showParticles")
-        visulizationFolder.add(this.guiOptions, "showBasicSprings")
-        visulizationFolder.add(this.guiOptions, "showShearSprings")
-        visulizationFolder.add(this.guiOptions, "showBendSprings")
+        visulizationFolder.add(this.guiOptions, "show_mesh");
+        visulizationFolder.add(this.guiOptions, "showParticles");
+        visulizationFolder.add(this.guiOptions, "showBasicSprings");
+        visulizationFolder.add(this.guiOptions, "showShearSprings");
+        visulizationFolder.add(this.guiOptions, "showBendSprings");
 
         visulizationFolder.open();
 
@@ -122,46 +122,59 @@ class ClothWindow extends Window {
         this.scene.add(new THREE.GridHelper(50, 20));
 
         // lighting
-        this.pointLight = new THREE.PointLight(LIGHT_COLOR , POINT_LIGHT_INTENSITY, POINT_LIGHT_DISTANCE );
-        this.pointLight.position.set( 2, 3, 2 );
-        this.scene.add( this.pointLight );
+        this.pointLight = new THREE.PointLight(LIGHT_COLOR, POINT_LIGHT_INTENSITY, POINT_LIGHT_DISTANCE);
+        this.pointLight.position.set(2, 3, 2);
+        this.scene.add(this.pointLight);
 
         this.ambientLight = new THREE.AmbientLight(LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY);
         this.scene.add(this.ambientLight);
 
-        this.camera = new THREE.PerspectiveCamera(
-			75,
-			window.innerWidth / window.innerHeight,
-			0.1,
-			1000
-        );
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 5;
-        
+
         this.orbitControls = new OrbitControls(this.camera, renderer.domElement);
         this.orbitControls.update();
         this.orbitControls.enabled = true;
 
-        let clothPos = new THREE.Vector3(-CLOTH_SIZE * this.guiOptions.particle_distance / 2, 0.5, 0);
-        this.cloth = new Cloth(this.scene, this.camera, renderer, this.orbitControls, this.guiOptions, generalFolder, CLOTH_SIZE, CLOTH_SIZE, clothPos, this.guiOptions.particle_distance);
-        this.cloth.setParticlePos(CLOTH_SIZE-1, CLOTH_SIZE-1, this.getRightCornerPos());
-        this.cloth.setAnchorParticle(CLOTH_SIZE-1, CLOTH_SIZE-1);
-        this.cloth.setParticlePos(0, CLOTH_SIZE-1, this.getLeftCornerPos());
-        this.cloth.setAnchorParticle(0, CLOTH_SIZE-1);
+        let clothPos = new THREE.Vector3((-CLOTH_SIZE * this.guiOptions.particle_distance) / 2, 0.5, 0);
+        this.cloth = new Cloth(
+            this.scene,
+            this.camera,
+            renderer,
+            this.orbitControls,
+            this.guiOptions,
+            generalFolder,
+            CLOTH_SIZE,
+            CLOTH_SIZE,
+            clothPos,
+            this.guiOptions.particle_distance
+        );
+        this.cloth.setParticlePos(CLOTH_SIZE - 1, CLOTH_SIZE - 1, this.getRightCornerPos());
+        this.cloth.setAnchorParticle(CLOTH_SIZE - 1, CLOTH_SIZE - 1);
+        this.cloth.setParticlePos(0, CLOTH_SIZE - 1, this.getLeftCornerPos());
+        this.cloth.setAnchorParticle(0, CLOTH_SIZE - 1);
     }
 
     update(time) {
         this.renderer.clearDepth();
 
         this.cloth.update(time);
-        
     }
 
     getLeftCornerPos() {
-        return new THREE.Vector3(-CLOTH_SIZE * this.guiOptions.particle_distance / 2, CLOTH_SIZE * this.guiOptions.particle_distance + CLOTH_TO_FLOOR_DISTANCE, 0);
+        return new THREE.Vector3(
+            (-CLOTH_SIZE * this.guiOptions.particle_distance) / 2,
+            CLOTH_SIZE * this.guiOptions.particle_distance + CLOTH_TO_FLOOR_DISTANCE,
+            0
+        );
     }
 
     getRightCornerPos() {
-        return new THREE.Vector3(CLOTH_SIZE * this.guiOptions.particle_distance / 2, CLOTH_SIZE * this.guiOptions.particle_distance + CLOTH_TO_FLOOR_DISTANCE, 0);
+        return new THREE.Vector3(
+            (CLOTH_SIZE * this.guiOptions.particle_distance) / 2,
+            CLOTH_SIZE * this.guiOptions.particle_distance + CLOTH_TO_FLOOR_DISTANCE,
+            0
+        );
     }
 
     getScene() {
@@ -175,8 +188,6 @@ class ClothWindow extends Window {
     getGUI() {
         return this.gui;
     }
-
 }
 
-    export { ClothWindow };
-
+export { ClothWindow };

@@ -17,23 +17,13 @@ class ClothVisulization {
         for (let x = 0; x < this.cloth.width; x++) {
             this.springs.push([]);
             for (let y = 0; y < this.cloth.height; y++) {
-                this.springs[x].push(
-                    Array(this.cloth.springs.length).fill(null)
-                );
+                this.springs[x].push(Array(this.cloth.springs.length).fill(null));
                 this.cloth.springs.forEach((spring, i) => {
                     let otherX = x + spring.x;
                     let otherY = y + spring.y;
-                    if (
-                        otherX >= 0 &&
-                        otherX <= this.cloth.width - 1 &&
-                        otherY >= 0 &&
-                        otherY <= this.cloth.height - 1
-                    ) {
+                    if (otherX >= 0 && otherX <= this.cloth.width - 1 && otherY >= 0 && otherY <= this.cloth.height - 1) {
                         let geometry = new THREE.Geometry();
-                        geometry.vertices.push(
-                            this.cloth.particles[x][y].position,
-                            this.cloth.particles[otherX][otherY].position
-                        );
+                        geometry.vertices.push(this.cloth.particles[x][y].position, this.cloth.particles[otherX][otherY].position);
 
                         let line = new THREE.Line(
                             geometry,
@@ -67,11 +57,7 @@ class ClothVisulization {
         for (let i = 0; i < this.cloth.width * this.cloth.height * 2; i++) {
             this.meshUVs.push(0);
         }
-        for (
-            let i = 0;
-            i < (this.cloth.width - 1) * (this.cloth.height - 1) * 2;
-            i++
-        ) {
+        for (let i = 0; i < (this.cloth.width - 1) * (this.cloth.height - 1) * 2; i++) {
             this.meshIndecies.push(0, 0, 0);
         }
 
@@ -96,20 +82,15 @@ class ClothVisulization {
 
         for (let y = 0; y < this.cloth.height; y++) {
             for (let x = 0; x < this.cloth.width; x++) {
-                this.meshUVs[2 * (y * this.cloth.width + x) + 0] =
-                    x / (this.cloth.width - 1);
-                this.meshUVs[2 * (y * this.cloth.width + x) + 1] =
-                    y / (this.cloth.height - 1);
+                this.meshUVs[2 * (y * this.cloth.width + x) + 0] = x / (this.cloth.width - 1);
+                this.meshUVs[2 * (y * this.cloth.width + x) + 1] = y / (this.cloth.height - 1);
             }
         }
 
         this.meshGeometry = new THREE.BufferGeometry();
         this.meshGeometry.setIndex(this.meshIndecies);
 
-        this.vertexBuffer = new THREE.Float32BufferAttribute(
-            this.meshVertecies,
-            3
-        );
+        this.vertexBuffer = new THREE.Float32BufferAttribute(this.meshVertecies, 3);
         this.meshGeometry.setAttribute("position", this.vertexBuffer);
         this.meshGeometry.computeVertexNormals();
 
@@ -118,9 +99,7 @@ class ClothVisulization {
 
         this.meshMaterial = new THREE.MeshPhongMaterial({
             side: THREE.DoubleSide,
-            map: new THREE.TextureLoader().load(
-                "/assets/textures/gray_cloth_fabric.jpg"
-            ),
+            map: new THREE.TextureLoader().load("/assets/textures/gray_cloth_fabric.jpg"),
         });
 
         this.mesh = new THREE.Mesh(this.meshGeometry, this.meshMaterial);
@@ -150,29 +129,19 @@ class ClothVisulization {
                     }
 
                     if (
-                        (i >= 0 &&
-                            i < 4 &&
-                            this.cloth.options.showBasicSprings) ||
-                        (i >= 4 &&
-                            i < 8 &&
-                            this.cloth.options.showShearSprings) ||
+                        (i >= 0 && i < 4 && this.cloth.options.showBasicSprings) ||
+                        (i >= 4 && i < 8 && this.cloth.options.showShearSprings) ||
                         (i >= 8 && i < 12 && this.cloth.options.showBendSprings)
                     ) {
                         let pos1 = this.cloth.particles[x][y].position;
-                        let pos2 = this.cloth.particles[spring.other.x][
-                            spring.other.y
-                        ].position;
+                        let pos2 = this.cloth.particles[spring.other.x][spring.other.y].position;
                         let direction = pos1.clone().sub(pos2);
 
                         spring.geometry.vertices[0] = pos1;
                         spring.geometry.vertices[1] = pos2;
 
                         spring.geometry.verticesNeedUpdate = true;
-                        let scale = this.clamp(
-                            direction.length() / val.restingDistance,
-                            0,
-                            2
-                        );
+                        let scale = this.clamp(direction.length() / val.restingDistance, 0, 2);
                         let color = COLOR_REST;
                         if (scale > 1) {
                             color = COLOR_STRETCHED;
@@ -199,15 +168,9 @@ class ClothVisulization {
 
         for (let y = 0; y < this.cloth.height; y++) {
             for (let x = 0; x < this.cloth.width; x++) {
-                vertecies[
-                    3 * (y * this.cloth.width + x) + 0
-                ] = this.cloth.clothState.positions[x][y].x;
-                vertecies[
-                    3 * (y * this.cloth.width + x) + 1
-                ] = this.cloth.clothState.positions[x][y].y;
-                vertecies[
-                    3 * (y * this.cloth.width + x) + 2
-                ] = this.cloth.clothState.positions[x][y].z;
+                vertecies[3 * (y * this.cloth.width + x) + 0] = this.cloth.clothState.positions[x][y].x;
+                vertecies[3 * (y * this.cloth.width + x) + 1] = this.cloth.clothState.positions[x][y].y;
+                vertecies[3 * (y * this.cloth.width + x) + 2] = this.cloth.clothState.positions[x][y].z;
             }
         }
 
