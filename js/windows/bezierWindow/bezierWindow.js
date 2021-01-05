@@ -88,7 +88,7 @@ class BezierWindow extends Window {
 
 		for (let i = 0; i < NUM_CONTROL_POINTS; i++) {
 			let sphere = new THREE.Mesh(controlPointGeometry, controlPointMaterial);
-			sphere.position.x = i;
+			sphere.position.x = i - NUM_CONTROL_POINTS / 2;
 			sphere.position.y = i % 2;
 			this.scene.add(sphere);
 			this.controlPoints.push(sphere);

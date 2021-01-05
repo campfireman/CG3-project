@@ -43,7 +43,7 @@ class Cloth {
             for (let y = 0; y < height; y++) {
                 let partPos = pos
                     .clone()
-                    .add(new THREE.Vector3(x * partDistance, y * partDistance, (y * partDistance) / 2 /*Math.random() / 1000 - 0.001*/));
+                    .add(new THREE.Vector3(x * partDistance, y * partDistance, (y * partDistance) / 2));
 
                 let sphere = new THREE.Mesh(SPHERE_GEOMETRY, SPHERE_MATERIAL);
                 sphere.position.x = partPos.x;
