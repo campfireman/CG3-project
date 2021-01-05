@@ -275,7 +275,6 @@ class QuaternionWindow extends Window {
         if (this.rotationAxisArrow != null) {
             this.objectsToPurge.forEach((obj) => {
                 this.scene.remove(obj);
-                console.log(obj);
             });
             this.sphere.remove(this.interpolationStart);
             this.sphere.remove(this.interpolationEnd);
