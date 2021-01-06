@@ -19,6 +19,7 @@ class ClothWindow extends Window {
     constructor(renderer) {
         super(renderer);
 
+        // GUI options
         this.guiOptions = {
             particle_distance: PARTICLE_DISTANCE,
             particle_mass: 1.5,
@@ -113,9 +114,11 @@ class ClothWindow extends Window {
         this.ambientLight = new THREE.AmbientLight(LIGHT_COLOR, AMBIENT_LIGHT_INTENSITY);
         this.scene.add(this.ambientLight);
 
+        // camera
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.camera.position.z = 5;
 
+        // orbit controls
         this.orbitControls = new OrbitControls(this.camera, renderer.domElement);
         this.orbitControls.update();
         this.orbitControls.enabled = true;
@@ -130,21 +133,29 @@ class ClothWindow extends Window {
             generalFolder,
             CLOTH_SIZE,
             CLOTH_SIZE,
-            clothPos,
-            this.guiOptions.particle_distance
+            clothPos
         );
+
+        // fix two upper corners by default
         this.cloth.setParticlePos(CLOTH_SIZE - 1, CLOTH_SIZE - 1, this.getRightCornerPos());
         this.cloth.setAnchorParticle(CLOTH_SIZE - 1, CLOTH_SIZE - 1);
         this.cloth.setParticlePos(0, CLOTH_SIZE - 1, this.getLeftCornerPos());
         this.cloth.setAnchorParticle(0, CLOTH_SIZE - 1);
     }
 
+    /**
+     * gets called every frame to update the simulation
+     * @param {Number} time time since last frame in miliseconds
+     */
     update(time) {
         this.renderer.clearDepth();
 
         this.cloth.update(time);
     }
 
+    /**
+     * calculates the position of the left corner in its fixed state
+     */
     getLeftCornerPos() {
         return new THREE.Vector3(
             (-CLOTH_SIZE * this.guiOptions.particle_distance) / 2,
@@ -153,6 +164,9 @@ class ClothWindow extends Window {
         );
     }
 
+    /**
+     * calculates the position of the right corner in its fixed state
+     */
     getRightCornerPos() {
         return new THREE.Vector3(
             (CLOTH_SIZE * this.guiOptions.particle_distance) / 2,

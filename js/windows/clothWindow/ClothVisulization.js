@@ -62,20 +62,21 @@ class ClothVisulization {
      * Initializes the triangle mesh of the cloth and loads texture for it
      */
     initMesh() {
-        this.meshVertecies = [];
-        this.meshIndecies = [];
-        this.meshUVs = [];
-
+        // initialize arrays for vertex, index, and texture positions
+        let meshVertecies = [];
+        let meshIndecies = [];
+        let meshUVs = [];
         for (let i = 0; i < this.cloth.width * this.cloth.height * 3; i++) {
-            this.meshVertecies.push(0);
+            meshVertecies.push(0);
         }
         for (let i = 0; i < this.cloth.width * this.cloth.height * 2; i++) {
-            this.meshUVs.push(0);
+            meshUVs.push(0);
         }
         for (let i = 0; i < (this.cloth.width - 1) * (this.cloth.height - 1) * 2; i++) {
-            this.meshIndecies.push(0, 0, 0);
+            meshIndecies.push(0, 0, 0);
         }
 
+        // calculate indecies
         for (let y = 0; y < this.cloth.height - 1; y++) {
             for (let x = 0; x < this.cloth.width - 1; x++) {
                 let a = y * this.cloth.width + x;
@@ -85,64 +86,76 @@ class ClothVisulization {
 
                 let faceStartIndex = 6 * (y * (this.cloth.width - 1) + x);
 
-                this.meshIndecies[faceStartIndex + 0] = a;
-                this.meshIndecies[faceStartIndex + 1] = b;
-                this.meshIndecies[faceStartIndex + 2] = c;
+                meshIndecies[faceStartIndex + 0] = a;
+                meshIndecies[faceStartIndex + 1] = b;
+                meshIndecies[faceStartIndex + 2] = c;
 
-                this.meshIndecies[faceStartIndex + 3] = a;
-                this.meshIndecies[faceStartIndex + 4] = c;
-                this.meshIndecies[faceStartIndex + 5] = d;
+                meshIndecies[faceStartIndex + 3] = a;
+                meshIndecies[faceStartIndex + 4] = c;
+                meshIndecies[faceStartIndex + 5] = d;
             }
         }
 
+        // calculate texture coordinates
         for (let y = 0; y < this.cloth.height; y++) {
             for (let x = 0; x < this.cloth.width; x++) {
-                this.meshUVs[2 * (y * this.cloth.width + x) + 0] = x / (this.cloth.width - 1);
-                this.meshUVs[2 * (y * this.cloth.width + x) + 1] = y / (this.cloth.height - 1);
+                meshUVs[2 * (y * this.cloth.width + x) + 0] = x / (this.cloth.width - 1);
+                meshUVs[2 * (y * this.cloth.width + x) + 1] = y / (this.cloth.height - 1);
             }
         }
 
-        this.meshGeometry = new THREE.BufferGeometry();
-        this.meshGeometry.setIndex(this.meshIndecies);
+        // initialize buffer geometry object which will contain vertecies, indecies and texture coordinates
+        let meshGeometry = new THREE.BufferGeometry();
 
-        this.vertexBuffer = new THREE.Float32BufferAttribute(this.meshVertecies, 3);
-        this.meshGeometry.setAttribute("position", this.vertexBuffer);
-        this.meshGeometry.computeVertexNormals();
+        // set indecies
+        meshGeometry.setIndex(meshIndecies);
 
-        let uvBuffer = new THREE.Float32BufferAttribute(this.meshUVs, 2, true);
-        this.meshGeometry.setAttribute("uv", uvBuffer);
+        // set vertecies
+        let vertexBuffer = new THREE.Float32BufferAttribute(meshVertecies, 3);
+        meshGeometry.setAttribute("position", vertexBuffer);
 
-        this.meshMaterial = new THREE.MeshPhongMaterial({
+        // automatically compute normals
+        meshGeometry.computeVertexNormals();
+
+        // set texture coordinates
+        let uvBuffer = new THREE.Float32BufferAttribute(meshUVs, 2, true);
+        meshGeometry.setAttribute("uv", uvBuffer);
+
+        // load texture
+        let meshMaterial = new THREE.MeshPhongMaterial({
             side: THREE.DoubleSide,
             map: new THREE.TextureLoader().load("/assets/textures/gray_cloth_fabric.jpg"),
         });
 
-        this.mesh = new THREE.Mesh(this.meshGeometry, this.meshMaterial);
+        // create mesh and add it to the scene
+        this.mesh = new THREE.Mesh(meshGeometry, meshMaterial);
         this.cloth.scene.add(this.mesh);
 
+        // call update once here so the vertecies get updated
         this.updateMesh();
     }
 
+    /**
+     * initializes spheres as particles in a 2D-Array
+     */
     initParticles() {
         for (let x = 0; x < this.cloth.width; x++) {
             this.particles.push([]);
             for (let y = 0; y < this.cloth.height; y++) {
-                let partPos = this.cloth.pos
-                    .clone()
-                    .add(new THREE.Vector3(x * this.cloth.options.particle_distance, y * this.cloth.options.particle_distance, (y * this.cloth.options.particle_distance) / 2));
-
                 let sphere = new THREE.Mesh(SPHERE_GEOMETRY, SPHERE_MATERIAL);
-                sphere.position.x = partPos.x;
-                sphere.position.y = partPos.y;
-                sphere.position.z = partPos.z;
+
+                // set the initial position
+                sphere.position.x = this.cloth.clothState.positions[x][y].x;
+                sphere.position.y = this.cloth.clothState.positions[x][y].y;
+                sphere.position.z = this.cloth.clothState.positions[x][y].z;
+
+                // save the 2D-coordinates to know later which particle is ment
                 sphere.clothPosX = x;
                 sphere.clothPosY = y;
+
+                // add the particle to 2D-Array and to the scene
                 this.cloth.scene.add(sphere);
-
                 this.particles[x].push(sphere);
-                this.cloth.clothState.positions[x][y] = partPos.clone();
-
-                //this.selectionGroup.push(sphere);
             }
         }
     }
@@ -159,8 +172,6 @@ class ClothVisulization {
         } else {
             this.mesh.visible = false;
         }
-
-        
     }
 
     /**
@@ -228,9 +239,13 @@ class ClothVisulization {
 
         this.mesh.geometry.computeVertexNormals();
 
+        // set the flag so the vertecies get updated
         this.mesh.geometry.attributes.position.needsUpdate = true;
     }
 
+    /**
+     * updates the position of the spheres based on the cloth State
+     */
     updateParticlesPositions() {
         for (let x = 0; x < this.cloth.width; x++) {
             for (let y = 0; y < this.cloth.height; y++) {

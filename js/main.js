@@ -1,10 +1,11 @@
+import * as THREE from "/three/three.module.js";
+import * as DAT from "/dat/dat.gui.module.js";
+
+import Stats from "/jsm/libs/stats.module.js";
+
 import { BezierWindow } from "./windows/bezierWindow/bezierWindow.js";
 import { ClothWindow } from "./windows/clothWindow/clothWindow.js";
 import { QuaternionWindow } from "./windows/quaternionWindow/quaternionWindow.js";
-
-import Stats from "/jsm/libs/stats.module.js";
-import * as DAT from "/dat/dat.gui.module.js";
-import * as THREE from "/three/three.module.js";
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -45,10 +46,13 @@ var windowFolder = windowsSelectGui.addFolder("Current window");
 windowFolder
     .add(globalOptions, "window", windowIndecies)
     .onChange((newWindowIndex) => {
+        // hide gui of the old window
         currentWindow.hide();
 
+        // select new window
         currentWindow = windowInstances[newWindowIndex];
 
+        // show gui of the old window
         currentWindow.show();
     });
 windowFolder.open();
@@ -56,6 +60,7 @@ document
     .getElementById("window-control")
     .appendChild(windowsSelectGui.domElement);
 
+// render loop
 function animate(time) {
     stats.begin();
     currentWindow.update(time - lastTme);

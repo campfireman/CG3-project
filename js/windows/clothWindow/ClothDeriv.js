@@ -1,5 +1,8 @@
 import * as THREE from "/three/three.module.js";
 
+/**
+ * represents the derivative of the ClothState
+ */
 class ClothDeriv {
     constructor(width, height) {
         this.width = width;
@@ -18,6 +21,10 @@ class ClothDeriv {
         }
     }
 
+    /**
+     * multiplies the derivative with a scalar value
+     * @param {Number} factor factor for the derivative to be multiplied with
+     */
     mul(factor) {
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {

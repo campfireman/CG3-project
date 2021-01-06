@@ -2,8 +2,12 @@ import { ClothDeriv } from "./ClothDeriv.js";
 
 import * as THREE from "/three/three.module.js";
 
+// static 2D-array of boolean values which shows which particles are inmovable
 var isInfiniteMass = [];
 
+/**
+ * Represents the State of the cloth including all particles
+ */
 class ClothState {
     constructor(cloth) {
         this.width = cloth.width;
@@ -17,12 +21,22 @@ class ClothState {
             this.positions.push([]);
             this.velocities.push([]);
             for (let y = 0; y < this.height; y++) {
-                this.positions[x].push(new THREE.Vector3());
+                // set initial position
+                let partPos = cloth.pos
+                    .clone()
+                    .add(new THREE.Vector3(x * cloth.options.particle_distance, y * cloth.options.particle_distance, (y * cloth.options.particle_distance) / 2));
+                this.positions[x].push(partPos);
+
+                // set initial velocity
                 this.velocities[x].push(new THREE.Vector3());
             }
         }
     }
 
+    /**
+     * adds a cloth derivative onto this cloth state
+     * @param {ClothDeriv} clothDeriv derivative of the clothState which is to be added onto this State
+     */
     add(clothDeriv) {
         for (let x = 0; x < this.width; x++) {
             for (let y = 0; y < this.height; y++) {
@@ -38,6 +52,10 @@ class ClothState {
         return this;
     }
 
+    /**
+     * calculates the derivative of this state
+     * @param {Number} h step size
+     */
     getDeriv(h) {
         let deriv = new ClothDeriv(this.width, this.height);
         let windForce = new THREE.Vector3(0, 0, 0);
@@ -114,6 +132,9 @@ class ClothState {
         return deriv;
     }
 
+    /**
+     * Creates a deep copy of this state
+     */
     clone() {
         let ret = new ClothState(this.cloth);
 
@@ -127,6 +148,13 @@ class ClothState {
         return ret;
     }
 
+    /**
+     * calculates the force of a spring between two points
+     * @param {THREE.Vector3} pos1 first end of the Spring
+     * @param {THREE.Vector3} pos2 second end of the spring
+     * @param {Number} toughness spring konstant
+     * @param {Number} restingDistance spring length is the resting state
+     */
     calcSpringForce(pos1, pos2, toughness, restingDistance) {
         let direction = pos2.clone().sub(pos1);
         let displacement = direction.length() - restingDistance;
@@ -136,6 +164,11 @@ class ClothState {
     }
 }
 
+/**
+ * Calculates the geometric distance between two cloth states
+ * @param {ClothState} s1 Clothstate 1
+ * @param {ClothState} s2 ClothState 2
+ */
 function distance(s1, s2) {
     let sum = 0;
     for (let x = 0; x < s1.width; x++) {
@@ -150,6 +183,11 @@ function distance(s1, s2) {
     return Math.sqrt(sum);
 }
 
+/**
+ * initializes the static array which indicates the inmovable particles
+ * @param {Number} width cloth width
+ * @param {Number} height cloth height
+ */
 function initMassArray(width, height) {
     for (let x = 0; x < width; x++) {
         isInfiniteMass.push([]);
@@ -159,6 +197,12 @@ function initMassArray(width, height) {
     }
 }
 
+/**
+ * sets a particle to be moveable or inmoveable based on isInfinite
+ * @param {Number} x x position of the particle in the particle matrix
+ * @param {Number} y y position of the particle in the particle matrix
+ * @param {Boolean} isInfinite flag whether the particle should be inmoveable
+ */
 function setInfiniteMass(x, y, isInfinite) {
     isInfiniteMass[x][y] = isInfinite;
 }

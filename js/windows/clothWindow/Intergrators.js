@@ -1,8 +1,18 @@
+/**
+ * Basic Euler-Integrator
+ * @param {ClothState} x state which is to be integrated
+ * @param {Number} h step size
+ */
 function integrateEuler(x, h) {
     let deriv = x.getDeriv(h);
     x.add(deriv);
 }
 
+/**
+ * Runge-Kutta-Integrator
+ * @param {ClothState} x state which is to be integrated
+ * @param {Number} h step size
+ */
 function integrateRungeKutta(x, h) {
     let deriv1 = x.getDeriv(h);
 
