@@ -62,4 +62,4 @@ Es stehen zwei Integratoren zur Verfügung: Euler-Integrator und Runge-Kutta-Int
 ### Visualisationseinstellunngen
 Im letztem Abschnitt der GUI können verschiedene Visualisierungen an und aus gemacht werden.
 
-Bei der Option `showParticles` werden die Partikel gefärbt, je nach dem wie groß die Gesamtkraft ist, die auf den Partikel wirkt. Je größer der betrag der Gesamtkraft, desto rötlicher wird der Partikel bemalt.
+Bei der Option `showParticles` werden die Partikel gefärbt, je nach dem wie groß die Gesamtkraft ist, die auf den Partikel wirkt. Je größer der betrag der Gesamtkraft, desto rötlicher wird der Partikel bemalt. Die Federn werden rötlicher wenn sie gestrect werden und grüner wenn sie gestaucht werden.
