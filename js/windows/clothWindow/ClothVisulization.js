@@ -173,10 +173,9 @@ class ClothVisulization {
         } else {
             this.mesh.visible = false;
         }
-        if(this.cloth.options.show_mesh) {
+        if (this.cloth.options.show_mesh) {
             this.updateParticleColors();
         }
-        
     }
 
     /**

@@ -24,7 +24,13 @@ class ClothState {
                 // set initial position
                 let partPos = cloth.pos
                     .clone()
-                    .add(new THREE.Vector3(x * cloth.options.particle_distance, y * cloth.options.particle_distance, (y * cloth.options.particle_distance) / 2));
+                    .add(
+                        new THREE.Vector3(
+                            x * cloth.options.particle_distance,
+                            y * cloth.options.particle_distance,
+                            (y * cloth.options.particle_distance) / 2
+                        )
+                    );
                 this.positions[x].push(partPos);
 
                 // set initial velocity
@@ -60,8 +66,10 @@ class ClothState {
         let deriv = new ClothDeriv(this.width, this.height);
         let windForce = new THREE.Vector3(0, 0, 0);
         if (this.cloth.options.wind) {
+            // use step size as entropy source and use cosine as periodic wave function
             const windStrength = Math.cos(h * 7) * this.cloth.options.windForce;
 
+            // use varying wind directions to simulate light wind
             windForce.set(Math.sin(h / 20), Math.cos(h / 30), Math.sin(h / 10));
             windForce.normalize();
             windForce.multiplyScalar(windStrength);
@@ -75,7 +83,6 @@ class ClothState {
                 let normals = [];
 
                 // Gravity
-                // force.y += -this.cloth.gravity();
                 force.y += -this.cloth.options.gravity;
 
                 // Air resistance
@@ -88,6 +95,7 @@ class ClothState {
                 this.cloth.springs.forEach((spring, i) => {
                     let otherX = x + spring.x;
                     let otherY = y + spring.y;
+                    // only create springs if spring is connected to particle index within cloth
                     if (otherX >= 0 && otherX <= this.width - 1 && otherY >= 0 && otherY <= this.height - 1) {
                         force.add(
                             this.calcSpringForce(
@@ -99,6 +107,7 @@ class ClothState {
                         );
 
                         // use the chance to calculate normals as well
+                        // calculate normal by looking at surroundig neighbours
                         if (this.cloth.options.wind && i >= 0 && i < 4) {
                             normals.push(this.positions[x][y].clone().sub(this.positions[otherX][otherY]));
                         }
@@ -106,6 +115,7 @@ class ClothState {
                 });
 
                 // wind
+                // wind force depends on the orientation particle, only apply full force if normal of particle is parallel
                 if (this.cloth.options.wind) {
                     let normal = normals[0].cross(normals[1]);
                     if (normals.length == 4) {
