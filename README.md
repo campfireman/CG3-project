@@ -22,7 +22,7 @@ Bezier-kurve zwischen den vier angezeigten Punkten.
 
 ### Animation
 Die Punkte können beliebig verschoben werden und die Kurve passt sich immer automatisch an.
-In der GUI kann mit dem Knopf `Animate` die Animation gestartet werden die den Casteljau-Algorithmus darstellt und die Kurve zeichnet. Der `AnimationProgress` kann auch per Hand verschoben werden um sich die Visualisierung an einer bestimmten Position anzugucken.
+In der GUI kann mit dem Knopf `Animate` die Animation gestartet werden die den Casteljau-Algorithmus darstellt und die Kurve zeichnet. Der `AnimationProgress` kann auch per Hand verschoben werden um sich die Visualisierung an einer bestimmten Position anzugucken. Bei Linux-basierten Systemen kann es vorkommen, dass beim Animierten zeichen der Kurve die Kurve nicht angezeigt wird (Dies kann bei der Präsentation gezeigt werden).
 
 ### Bernsteinpolynome
 Im Hintergrund befinden sich die vier ersten Bernsteinpolynome mit jeweils einer Farbe. Die Bezierkurve nimmt jeweils die Farbe des Bernsteinpolynoms der momentan den größten Einfluss hat.

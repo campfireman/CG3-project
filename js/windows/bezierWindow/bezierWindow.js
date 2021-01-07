@@ -51,36 +51,7 @@ class BezierWindow extends Window {
 		// all objects which can be selected
 		this.selectionGroup = [];
 
-		// GUI
-		this.guiOptions = {
-			animationSpeed: 0.0005,
-			animationProgress: 0,
-			animate: () => {
-				this.animating = true;
-				this.guiOptions.animationProgress = 0;
-			}
-		}
-		this.gui = new DAT.GUI();
-		var windowFolder = this.gui.addFolder("animation");
-		windowFolder.add(this.guiOptions, "animationSpeed", 0.00001, 0.001);
-		this.progressSlider = windowFolder.add(this.guiOptions, "animationProgress", 0.0, 1.0).step(0.001);
-		windowFolder.add(this.guiOptions, "animate");
-		windowFolder.open();
-
-		// scene, camera and controls
-		this.scene = new THREE.Scene();
-		this.scene.add(new THREE.GridHelper(50, 20));
-
-		this.camera = new THREE.PerspectiveCamera(
-			75,
-			window.innerWidth / window.innerHeight,
-			0.1,
-			1000
-		);
-		this.camera.position.z = 5;
-
-		this.orbitControls = new OrbitControls(this.camera, renderer.domElement);
-		this.orbitControls.update();
+		this.initGuiCameraControls(renderer);
 
 		// init spheres as for control point visualization
 		const controlPointGeometry = new THREE.SphereGeometry(0.1, 32, 32);
@@ -131,6 +102,21 @@ class BezierWindow extends Window {
 		});
 		this.scene.add(this.control);
 
+		// Line for the bezier curve
+		let geometry = new LineGeometry();
+		let material = new LineMaterial({
+			linewidth: 0.003,
+			vertexColors: true,
+		});
+		this.line = new Line2(geometry, material);
+		this.scene.add(this.line);
+
+		this.initEvents(renderer);
+		this.cacheBernsteinCurves(STEPS);
+		this.plotBernstein();
+	}
+
+	initEvents(renderer) {
 		// object selection on mouse click
 		renderer.domElement.addEventListener("click", (ev) => {
 			// do not select an object when there is currently other object being moved
@@ -167,18 +153,39 @@ class BezierWindow extends Window {
 		this.control.addEventListener("mouseUp", (ev) => {
 			this.justMoved = true;
 		});
+	}
 
-		// Line for the bezier curve
-		let geometry = new LineGeometry();
-		let material = new LineMaterial({
-			linewidth: 0.003,
-			vertexColors: true,
-		});
-		this.line = new Line2(geometry, material);
-		this.scene.add(this.line);
+	initGuiCameraControls(renderer) {
+		// GUI
+		this.guiOptions = {
+			animationSpeed: 0.0005,
+			animationProgress: 0,
+			animate: () => {
+				this.animating = true;
+				this.guiOptions.animationProgress = 0;
+			}
+		}
+		this.gui = new DAT.GUI();
+		var windowFolder = this.gui.addFolder("animation");
+		windowFolder.add(this.guiOptions, "animationSpeed", 0.00001, 0.001);
+		this.progressSlider = windowFolder.add(this.guiOptions, "animationProgress", 0.0, 1.0).step(0.001);
+		windowFolder.add(this.guiOptions, "animate");
+		windowFolder.open();
 
-		this.cacheBernsteinCurves(STEPS);
-		this.plotBernstein();
+		// scene, camera and controls
+		this.scene = new THREE.Scene();
+		this.scene.add(new THREE.GridHelper(50, 20));
+
+		this.camera = new THREE.PerspectiveCamera(
+			75,
+			window.innerWidth / window.innerHeight,
+			0.1,
+			1000
+		);
+		this.camera.position.z = 5;
+
+		this.orbitControls = new OrbitControls(this.camera, renderer.domElement);
+		this.orbitControls.update();
 	}
 
 	/**
