@@ -55,6 +55,7 @@ windowFolder
         // show gui of the old window
         currentWindow.show();
     });
+    
 windowFolder.open();
 document
     .getElementById("window-control")

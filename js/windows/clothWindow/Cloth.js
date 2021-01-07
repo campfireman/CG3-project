@@ -147,6 +147,8 @@ class Cloth {
         dt = dt / 1000;
         this.updateControls();
 
+        let numSteps;
+
         if (this.options.adaptive_step_size) {
             // make copies for the steps
             let singleStepState = this.clothState.clone();
@@ -164,7 +166,7 @@ class Cloth {
 
             // calculate new step size and number of steps to execute
             let newH = dt * Math.pow(this.options.max_error / error, 1 / this.integrator.order);
-            let numSteps = dt / newH;
+            numSteps = dt / newH;
 
             // clamt the number of steps if the number is too large
             if (numSteps > this.options.max_steps_per_frame) {
@@ -179,18 +181,14 @@ class Cloth {
             this.options.current_steps_per_frame = numSteps;
             this.options.current_step_size = newH;
 
-            for (let miniStep = 0; miniStep < numSteps; miniStep++) {
-                this.integrator.integrator(this.clothState, dt / numSteps);
-            }
         } else {
-            // perform a constant number of steps
-            let numSteps = this.options.max_steps_per_frame;
+            numSteps = this.options.max_steps_per_frame;
             this.options.current_step_size = dt / numSteps;
             this.options.current_steps_per_frame = numSteps;
+        }
 
-            for (let miniStep = 0; miniStep < numSteps; miniStep++) {
-                this.integrator.integrator(this.clothState, dt / numSteps);
-            }
+        for (let miniStep = 0; miniStep < numSteps; miniStep++) {
+            this.integrator.integrator(this.clothState, dt / numSteps);
         }
 
         // update gui
