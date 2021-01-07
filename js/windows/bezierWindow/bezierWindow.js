@@ -116,6 +116,10 @@ class BezierWindow extends Window {
 		this.plotBernstein();
 	}
 
+	/**
+	 * Initializes the necessary events
+	 * @param {THREE.Renderer} renderer scene renderer
+	 */
 	initEvents(renderer) {
 		// object selection on mouse click
 		renderer.domElement.addEventListener("click", (ev) => {
@@ -155,6 +159,10 @@ class BezierWindow extends Window {
 		});
 	}
 
+	/**
+	 * Initializes Gui, Camera, GridHelper and OrbitControls for the scene
+	 * @param {THREE.Renderer} renderer scene renderer
+	 */
 	initGuiCameraControls(renderer) {
 		// GUI
 		this.guiOptions = {
