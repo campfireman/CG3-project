@@ -198,8 +198,8 @@ class ClothVisulization {
                         (i >= 4 && i < 8 && this.cloth.options.showShearSprings) ||
                         (i >= 8 && i < 12 && this.cloth.options.showBendSprings)
                     ) {
-                        let pos1 = this.cloth.particles[x][y].position;
-                        let pos2 = this.cloth.particles[spring.other.x][spring.other.y].position;
+                        let pos1 = this.particles[x][y].position;
+                        let pos2 = this.particles[spring.other.x][spring.other.y].position;
                         let direction = pos1.clone().sub(pos2);
 
                         spring.geometry.vertices[0] = pos1;
@@ -267,7 +267,7 @@ class ClothVisulization {
         for (let x = 0; x < this.cloth.width; x++) {
             for (let y = 0; y < this.cloth.height; y++) {
                 let len = deriv.dVel[x][y].length();
-                this.particles[x][y].material.color.setRGB(len / 10, 0, 0);
+                this.particles[x][y].material.color.setRGB(len / 10, 1, 1);
             }
         }
     }
