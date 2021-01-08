@@ -9,7 +9,7 @@ canvas {
 
 #window-control{ 
     position: absolute;
-    top: 0;
+    top: 48px;
     left: 15px;
 }
 
