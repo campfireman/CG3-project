@@ -15,7 +15,8 @@ node app.js
 ```
 
 Projekt aufrufen unter: http://localhost:8080
-*Da WebGL unter Chrome/Chromium deutlich stabiler ist empfehlen wir die Verwendung dieser Browser*
+
+**Da WebGL unter Chrome/Chromium deutlich stabiler ist, empfehlen wir die Verwendung dieser Browser**
 
 ## Bezier
 
