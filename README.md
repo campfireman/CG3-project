@@ -53,11 +53,11 @@ Die Simulation des Tuchs.
 
 ### Allgemein
 
-Das Tuch besteht standardmäßig aus einer 20x20 Matrix an Partikeln. Falls die Performance nicht so gut ist kann dies in `/js/windows/clothWindow/clothWindow.js` bei der Konstante `CLOTH_SIZE` geändert werden. Außerdem einen hohen Maß an Realismus zu erreichen ist die Schrittweite an das delta t (vergangene Zeit seit dem letzten frame) gebunden. Dadurch verhält sich die Simulation zeitgemäß (wenn die fps-Zahl sinkt behält die Simulation trotzdem die Geschwindigkeit bei).
+Das Tuch besteht standardmäßig aus einer 20x20 Matrix an Partikeln. Falls die Performance nicht so gut ist kann dies in `/js/windows/clothWindow/clothWindow.js` bei der Konstante `CLOTH_SIZE` geändert werden. Außerdem, ein hohes Maß an Realismus zu erreichen, ist die Schrittweite an das delta t (vergangene Zeit seit dem letzten frame) gebunden. Dadurch verhält sich die Simulation zeitgemäß: Wenn die fps-Zahl sinkt behält die Simulation trotzdem die Geschwindigkeit bei.
 
 ### Tuch- und Umgebungseinstellungen
 
-Hier können allgemeine Tuch- und Umbebungseinstellungen vorgenommen werden. `Toughness` meint hierbei die Härte des Tuchs und gleichzeitig die Federkonstante. die Funktion der Biege- und Schärfedern kann am besten gezeigt werden wenn nur eine Ecke des Tuchs fixiert ist. Das Tuch verfält dann nicht in sich selbst sondern formt Falten.
+Hier können allgemeine Tuch- und Umgebungseinstellungen vorgenommen werden. `Toughness` meint hierbei die Härte des Tuchs und gleichzeitig die Federkonstante. die Funktion der Biege- und Schärfedern kann am besten gezeigt werden wenn nur eine Ecke des Tuchs fixiert ist. Das Tuch verfält dann nicht in sich selbst sondern formt Falten.
 
 ### Integratoren und adaptive schrittweite
 

@@ -47,6 +47,7 @@ class ClothVisulization {
                         this.springs[x][y][i] = {
                             line: line,
                             geometry: geometry,
+                            // save coordinates of other particle to save time
                             other: {
                                 x: otherX,
                                 y: otherY,
