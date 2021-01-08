@@ -50,7 +50,9 @@ class Cloth {
         this.springs.push({ x: -1, y: 0, toughness: options.toughness, restingDistance: options.particle_distance });
 
         // shear springs
-        this.diagonalRestingDistance = Math.sqrt(options.particle_distance * options.particle_distance + options.particle_distance * options.particle_distance);
+        this.diagonalRestingDistance = Math.sqrt(
+            options.particle_distance * options.particle_distance + options.particle_distance * options.particle_distance
+        );
         this.springs.push({ x: -1, y: -1, toughness: options.toughness, restingDistance: this.diagonalRestingDistance });
         this.springs.push({ x: -1, y: 1, toughness: options.toughness, restingDistance: this.diagonalRestingDistance });
         this.springs.push({ x: 1, y: -1, toughness: options.toughness, restingDistance: this.diagonalRestingDistance });
@@ -69,8 +71,8 @@ class Cloth {
 
         // fill the selection group with selectable particles
         let particles = this.clothVisualization.particles;
-        for(let i = 0; i < particles.length; i++) {
-            for(let j = 0; j < particles[i].length; j++) {
+        for (let i = 0; i < particles.length; i++) {
+            for (let j = 0; j < particles[i].length; j++) {
                 this.selectionGroup.push(particles[i][j]);
             }
         }
@@ -93,7 +95,9 @@ class Cloth {
         });
         scene.add(this.control);
 
-        renderer.domElement.addEventListener("click", (ev) => {
+        renderer.domElement.addEventListener(
+            "click",
+            (ev) => {
                 // if the click event results from a particle being moved do nothing
                 if (this.justMoved) {
                     this.justMoved = false;
@@ -112,7 +116,7 @@ class Cloth {
 
                 // select the nearest intersection relativve to the camera
                 let selectedPoint;
-                if(intersects[0]) {
+                if (intersects[0]) {
                     selectedPoint = intersects[0].object;
                 }
 
@@ -130,9 +134,10 @@ class Cloth {
                 // attach move controls to the selected particle
                 this.setAnchorParticle(selectedPoint.clothPosX, selectedPoint.clothPosY);
                 this.control.attach(selectedPoint);
-            }, true
+            },
+            true
         );
-        
+
         // remember if a particle was moved last frame
         this.control.addEventListener("mouseUp", (ev) => {
             this.justMoved = true;
@@ -165,7 +170,6 @@ class Cloth {
             // calculate error
             // possible error functions: geometricDistance, meanDistance, maxDistance
             let error = geometricDistance(singleStepState, doubleStepState);
-            console.log(error);
 
             // calculate new step size and number of steps to execute
             let newH = dt * Math.pow(this.options.max_error / error, 1 / this.integrator.order);
@@ -183,7 +187,6 @@ class Cloth {
             // update the numbers in the gui
             this.options.current_steps_per_frame = numSteps;
             this.options.current_step_size = newH;
-
         } else {
             numSteps = this.options.max_steps_per_frame;
             this.options.current_step_size = dt / numSteps;
@@ -222,7 +225,7 @@ class Cloth {
     }
 
     /**
-     * 
+     *
      * @param {Number} x x position of the particle in the particle matrix
      * @param {Number} y y position of the particle in the particle matrix
      * @param {THREE.Vector3} pos new world position
