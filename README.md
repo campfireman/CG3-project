@@ -73,3 +73,8 @@ In den Feldern `current_steps_per_frame` und `current_step_size` is jeweils zu s
 Im letztem Abschnitt der GUI können verschiedene Visualisierungen an und aus gemacht werden.
 
 Bei der Option `showParticles` werden die Partikel gefärbt, je nach dem wie groß die Gesamtkraft ist, die auf den Partikel wirkt. Je größer der betrag der Gesamtkraft, desto rötlicher wird der Partikel bemalt. Die Federn werden rötlicher wenn sie gestreckt werden und grüner wenn sie gestaucht werden.
+
+## Quellen
+
+- Textur cloth: https://www.the3rdsequence.com/texturedb/texture/39/gray+cloth+fabric/
+- Modell quaternionen: https://github.com/KhronosGroup/glTF-Sample-Models/blob/master/2.0/BrainStem/glTF-Binary/BrainStem.glb
