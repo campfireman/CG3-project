@@ -64,6 +64,7 @@ class ClothState {
      */
     getDeriv(h) {
         let deriv = new ClothDeriv(this.width, this.height);
+        // basis for wind taken from: https://github.com/mrdoob/three.js/blob/master/examples/webgl_animation_cloth.html
         let windForce = new THREE.Vector3(0, 0, 0);
         if (this.cloth.options.wind) {
             // use step size as entropy source and use cosine as periodic wave function
@@ -223,13 +224,13 @@ function maxDistance(s1, s2) {
         for (let y = 0; y < s1.height; y++) {
             let diffPos = s1.positions[x][y].clone().sub(s2.positions[x][y]);
             let diffLen = diffPos.length();
-            if(diffLen > max) {
+            if (diffLen > max) {
                 max = diffLen;
             }
 
             let diffVel = s1.velocities[x][y].clone().sub(s2.velocities[x][y]);
             diffLen = diffVel.length();
-            if(diffLen > max) {
+            if (diffLen > max) {
                 max = diffLen;
             }
         }
