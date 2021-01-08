@@ -1,5 +1,5 @@
 import * as INTEGRATORS from "./Intergrators.js";
-import { ClothState, distance, initMassArray, setInfiniteMass } from "./ClothState.js";
+import { ClothState, geometricDistance, meanDistance, maxDistance, initMassArray, setInfiniteMass } from "./ClothState.js";
 import { ClothVisulization } from "./ClothVisulization.js";
 
 import * as THREE from "/three/three.module.js";
@@ -144,6 +144,7 @@ class Cloth {
      * @param {Number} dt time since last frame in miliseconds
      */
     update(dt) {
+        // calculate in seconds
         dt = dt / 1000;
         this.updateControls();
 
@@ -162,13 +163,15 @@ class Cloth {
             this.integrator.integrator(doubleStepState, dt / 2);
 
             // calculate error
-            let error = distance(singleStepState, doubleStepState);
+            // possible error functions: geometricDistance, meanDistance, maxDistance
+            let error = geometricDistance(singleStepState, doubleStepState);
+            console.log(error);
 
             // calculate new step size and number of steps to execute
             let newH = dt * Math.pow(this.options.max_error / error, 1 / this.integrator.order);
             numSteps = dt / newH;
 
-            // clamt the number of steps if the number is too large
+            // clamp the number of steps if the number is too large
             if (numSteps > this.options.max_steps_per_frame) {
                 numSteps = this.options.max_steps_per_frame;
                 newH = dt / this.options.max_steps_per_frame;

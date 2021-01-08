@@ -89,7 +89,7 @@ class ClothWindow extends Window {
             });
         generalFolder.add(this.guiOptions, "adaptive_step_size");
         generalFolder.add(this.guiOptions, "max_error", 0.0001, 1).step(0.0001);
-        generalFolder.add(this.guiOptions, "max_steps_per_frame", 3, 50);
+        generalFolder.add(this.guiOptions, "max_steps_per_frame", 3, 100);
         generalFolder.add(this.guiOptions, "current_steps_per_frame");
         generalFolder.add(this.guiOptions, "current_step_size").step(0.0001);
         generalFolder.open();

@@ -179,7 +179,7 @@ class ClothState {
  * @param {ClothState} s1 Clothstate 1
  * @param {ClothState} s2 ClothState 2
  */
-function distance(s1, s2) {
+function geometricDistance(s1, s2) {
     let sum = 0;
     for (let x = 0; x < s1.width; x++) {
         for (let y = 0; y < s1.height; y++) {
@@ -191,6 +191,50 @@ function distance(s1, s2) {
         }
     }
     return Math.sqrt(sum);
+}
+
+/**
+ * Calculates the mean geometric distances between all positions and velocities in two clothStates
+ * @param {ClothState} s1 Clothstate 1
+ * @param {ClothState} s2 ClothState 2
+ */
+function meanDistance(s1, s2) {
+    let sum = 0;
+    for (let x = 0; x < s1.width; x++) {
+        for (let y = 0; y < s1.height; y++) {
+            let diffPos = s1.positions[x][y].clone().sub(s2.positions[x][y]);
+            sum += diffPos.length();
+
+            let diffVel = s1.velocities[x][y].clone().sub(s2.velocities[x][y]);
+            sum += diffVel.length();
+        }
+    }
+    return sum / (s1.width * s1.height * 2);
+}
+
+/**
+ * Calculates the max geometric distance between all positions and velocities in two clothStates
+ * @param {ClothState} s1 Clothstate 1
+ * @param {ClothState} s2 ClothState 2
+ */
+function maxDistance(s1, s2) {
+    let max = 0;
+    for (let x = 0; x < s1.width; x++) {
+        for (let y = 0; y < s1.height; y++) {
+            let diffPos = s1.positions[x][y].clone().sub(s2.positions[x][y]);
+            let diffLen = diffPos.length();
+            if(diffLen > max) {
+                max = diffLen;
+            }
+
+            let diffVel = s1.velocities[x][y].clone().sub(s2.velocities[x][y]);
+            diffLen = diffVel.length();
+            if(diffLen > max) {
+                max = diffLen;
+            }
+        }
+    }
+    return max;
 }
 
 /**
@@ -217,4 +261,4 @@ function setInfiniteMass(x, y, isInfinite) {
     isInfiniteMass[x][y] = isInfinite;
 }
 
-export { ClothState, distance, initMassArray, setInfiniteMass };
+export { ClothState, geometricDistance, meanDistance, maxDistance, initMassArray, setInfiniteMass };

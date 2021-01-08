@@ -3,9 +3,11 @@ import * as THREE from "/three/three.module.js";
 const COLOR_REST = 0xffffff;
 const COLOR_STRETCHED = 0xff0000;
 const COLOR_SQUEEZED = 0x00ff00;
+const PARTICLE_COLOR_SCALING = 1 / 9;
 
-const SPHERE_GEOMETRY = new THREE.SphereGeometry(0.06, 32, 32);
-const SPHERE_MATERIAL = new THREE.MeshPhongMaterial({ color: 0xcf1120 });
+const SPHERE_RADIUS = 0.06;
+const SPHERE_SEGMENTS = 32;
+const SPHERE_GEOMETRY = new THREE.SphereGeometry(SPHERE_RADIUS, SPHERE_SEGMENTS, SPHERE_SEGMENTS);
 
 /**
  * Responsible for additional entities to visualize the state of the cloth
@@ -267,7 +269,12 @@ class ClothVisulization {
         for (let x = 0; x < this.cloth.width; x++) {
             for (let y = 0; y < this.cloth.height; y++) {
                 let len = deriv.dVel[x][y].length();
-                this.particles[x][y].material.color.setRGB(len / 10, 1, 1);
+                let scale = len * PARTICLE_COLOR_SCALING;
+                if(scale > 1) {
+                    scale = 1;
+                }
+                let color = this.lerp(0xffffff, 0xff0000, scale);
+                this.particles[x][y].material.color.setHex(color);
             }
         }
     }
